@@ -12,6 +12,14 @@ const theme = createTheme({
       light: '#58d385',
       contrastText: '#ffffff'
      },
+     success: {
+      main:'#04c950',
+      light: '#def7e7'
+     },
+     error: {
+      main: '#ff0303',
+      light: '#ffe4de'
+     },
     text: {
       primary: '#1a1f22',
       secondary: '#637381',

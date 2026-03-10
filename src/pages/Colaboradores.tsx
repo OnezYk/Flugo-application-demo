@@ -1,3 +1,4 @@
+// MUI copmonents
 import {
   Table,
   TableBody,
@@ -9,11 +10,18 @@ import {
   Chip,
   Box,
   Typography,
-  Button,
 } from "@mui/material";
+
+// MUI icons
 import SouthRoundedIcon from "@mui/icons-material/SouthRounded";
 
+// Notionists
+import { createAvatar } from '@dicebear/core';
+import { notionists } from '@dicebear/collection';
+import PrimaryBtn from "../components/PrimaryBtn";
+
 const Colaboradores = () => {
+
   return (
     <Box
       sx={{
@@ -41,22 +49,8 @@ const Colaboradores = () => {
           Colaboradores
         </Typography>
 
-        <Button
-          variant="contained"
-          color="primary"
-          sx={{
-            textTransform: "none",
-            fontWeight: "600",
-            letterSpacing: 0.4,
-            px: 2.3,
-            py: 1.5,
-            transition: "all 0.2s",
-            ":hover": {transform: "scale(1.05)", bgcolor: "primary.light"},
-            ":active": {transform: "scale(0.95)"},
-          }}
-        >
-          Novo Colaborador
-        </Button>
+        <PrimaryBtn to="/formulario"> Novo Colaborador </PrimaryBtn>
+
       </Box>
 
       <ColaboradoresTable />
@@ -100,6 +94,14 @@ const rows = [
 ];
 
 const ColaboradoresTable = () => {
+
+  const getAvatar = (seed: string) => {
+    return createAvatar(notionists, { 
+      seed,
+      backgroundColor: ['b6e3f4', 'c0aede', 'd1d4f9', 'ffd5dc', 'ffdfbf']
+    }).toString();
+  }
+
   return (
     <TableContainer
       sx={{
@@ -142,7 +144,7 @@ const ColaboradoresTable = () => {
             <TableRow key={row.id} sx={{"&:last-child td": {border: 0}}}>
               <TableCell>
                 <Box sx={{display: "flex", alignItems: "center", gap: 1.5}}>
-                  <Avatar src={row.avatar} sx={{width: 36, height: 36}} />
+                  <Avatar src={`data:image/svg+xml;utf8,${encodeURIComponent(getAvatar(row.name))}`} sx={{width: 36, height: 36}} />
                   <Typography fontWeight={500}>{row.name}</Typography>
                 </Box>
               </TableCell>
@@ -155,9 +157,9 @@ const ColaboradoresTable = () => {
                   sx={{
                     borderRadius: 1.5,
                     bgcolor:
-                      row.status === "Ativo" ? '#def7e7' : "#ffe4de",
+                      row.status === "Ativo" ? 'success.light' : "error.light",
                     color:
-                      row.status === "Ativo" ? "#04c950" : "#ff0303",
+                      row.status === "Ativo" ? "success.main" : "error.main",
                     fontWeight: 600,
                     fontSize: 12,
                   }}
