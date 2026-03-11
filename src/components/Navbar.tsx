@@ -8,6 +8,9 @@ import AccountBoxIcon from '@mui/icons-material/AccountBox';
 import { useNavigate } from "react-router-dom";
 
 const Navbar = () => {
+
+  const navigate = useNavigate()
+
   return (
     <Box sx={{
       minWidth: 300,
@@ -17,7 +20,7 @@ const Navbar = () => {
     <Box sx={{
       padding: 3,
     }}>
-      <img src={flugoLogo} className="imgCover" />
+      <img src={flugoLogo} className="imgCover" onClick={()=> navigate("/")}/>
     </Box>
     
     <Card>

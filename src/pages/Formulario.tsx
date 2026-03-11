@@ -9,8 +9,9 @@ import React, { useState, type ReactNode } from 'react'
 import MUISwitch from '../components/Switch';
 import PrimaryBtn from '../components/PrimaryBtn';
 import { useNavigate } from 'react-router-dom';
+import { postColaborador } from '../utils/postColaborador';
 
-type FormData ={
+export type FormData ={
   nome: string
   email: string
   departamento: string
@@ -38,7 +39,7 @@ const Formulario = () => {
     status: false
   })
 
-  const isValidEmail = (email:string) => /\w+[@]\w+(\.\w+)+/.test(email)
+  const isValidEmail = (email:string) => /^\S+[@]\S+(\.\S+)+$/.test(email)
   const isValidNome = (nome: string) => /^[a-zA-ZÀ-ÿ\s]+$/.test(nome)
   
   const isValid = () => {
@@ -55,8 +56,9 @@ const Formulario = () => {
 
   const navigate = useNavigate()
 
-  const handleSubmit = () => {
-    navigate("/");
+  const handleSubmit = async () => {
+    await postColaborador(form);
+    return navigate("/");
   }
 
   return (

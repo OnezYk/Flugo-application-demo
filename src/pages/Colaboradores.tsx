@@ -20,6 +20,12 @@ import { createAvatar } from '@dicebear/core';
 import { notionists } from '@dicebear/collection';
 import PrimaryBtn from "../components/PrimaryBtn";
 
+// My utils
+import getColaboradores from '../utils/getColaborador'
+import { useEffect, useState } from "react";
+import type { FormData } from "./Formulario";
+type ColaboradorProp = FormData & { id: string }
+
 const Colaboradores = () => {
 
   return (
@@ -58,42 +64,15 @@ const Colaboradores = () => {
   );
 };
 
-const rows = [
-  {
-    id: 1,
-    name: "Fernanda Torres",
-    email: "fernandatorres@flugo.com",
-    dept: "Design",
-    status: "Ativo",
-    avatar: "",
-  },
-  {
-    id: 2,
-    name: "Joana D'Arc",
-    email: "joanadarc@flugo.com",
-    dept: "TI",
-    status: "Ativo",
-    avatar: "",
-  },
-  {
-    id: 3,
-    name: "Mari Froes",
-    email: "marifroes@flugo.com",
-    dept: "Marketing",
-    status: "Ativo",
-    avatar: "",
-  },
-  {
-    id: 4,
-    name: "Clara Costa",
-    email: "claracosta@flugo.com",
-    dept: "Produto",
-    status: "Inativo",
-    avatar: "",
-  },
-];
-
 const ColaboradoresTable = () => {
+
+  const [colaboradores, setColaboradores] = useState<ColaboradorProp[]>([])
+
+  useEffect(() => {
+
+    getColaboradores().then(data => setColaboradores(data));
+
+  },[])
 
   const getAvatar = (seed: string) => {
     return createAvatar(notionists, { 
@@ -140,26 +119,26 @@ const ColaboradoresTable = () => {
         </TableHead>
 
         <TableBody>
-          {rows.map((row) => (
+          {colaboradores.map((row:ColaboradorProp) => (
             <TableRow key={row.id} sx={{"&:last-child td": {border: 0}}}>
               <TableCell>
                 <Box sx={{display: "flex", alignItems: "center", gap: 1.5}}>
-                  <Avatar src={`data:image/svg+xml;utf8,${encodeURIComponent(getAvatar(row.name))}`} sx={{width: 36, height: 36}} />
-                  <Typography fontWeight={500}>{row.name}</Typography>
+                  <Avatar src={`data:image/svg+xml;utf8,${encodeURIComponent(getAvatar(row.nome))}`} sx={{width: 36, height: 36}} />
+                  <Typography fontWeight={500}>{row.nome}</Typography>
                 </Box>
               </TableCell>
               <TableCell>{row.email}</TableCell>
-              <TableCell>{row.dept}</TableCell>
+              <TableCell>{row.departamento}</TableCell>
               <TableCell sx={{textAlign: "right"}}>
                 <Chip
-                  label={row.status}
+                  label={row.status ? "Ativo" : "Inativo"}
                   size="small"
                   sx={{
                     borderRadius: 1.5,
                     bgcolor:
-                      row.status === "Ativo" ? 'success.light' : "error.light",
+                      row.status ? 'success.light' : "error.light",
                     color:
-                      row.status === "Ativo" ? "success.main" : "error.main",
+                      row.status ? "success.main" : "error.main",
                     fontWeight: 600,
                     fontSize: 12,
                   }}
