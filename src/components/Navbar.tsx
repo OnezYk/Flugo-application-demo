@@ -1,30 +1,36 @@
-import { Box, Typography} from "@mui/material"
-import flugoLogo from '../assets/flugoLogo.png'
-import flugoLogoSm from '../assets/1200x630wa-Photoroom.png'
+// React
+import { useNavigate } from "react-router-dom";
+import { useState } from "react";
 
-import '../globals.css'
+// Logos
+import flugoLogo from '../assets/flugoLogo.png';
+import flugoLogoSm from '../assets/mobileLogo.png';
 
-import KeyboardArrowRightRoundedIcon from '@mui/icons-material/KeyboardArrowRightRounded'
+// MUI assets
+import { useMediaQuery, useTheme, Box, Typography } from '@mui/material';
+import KeyboardArrowRightRoundedIcon from '@mui/icons-material/KeyboardArrowRightRounded';
 import AccountBoxIcon from '@mui/icons-material/AccountBox';
 import MenuRoundedIcon from '@mui/icons-material/MenuRounded';
 
-import { useNavigate } from "react-router-dom";
+// Outros
+import '../globals.css';
 
-import { useMediaQuery, useTheme } from '@mui/material'
-import { useState } from "react"
-
-
+// Navbar
 const Navbar = () => {
-  const [open, setOpen] = useState(false)
-  const theme = useTheme()
-  const isMobile = useMediaQuery(theme.breakpoints.down('md'))
-  const isSmall = useMediaQuery('(max-width: 660px)')
+  const [open, setOpen] = useState(false);
+  const theme = useTheme();
+
+  
+  const isMobile = useMediaQuery(theme.breakpoints.down('md')); // true quando media < 900px
+  const isSmall = useMediaQuery('(max-width: 660px)'); // true quando media < 660px
 
   return (
     <>
+      {/* Condições de abertura navbar */}
       {(!isMobile || open) && 
       <>
       
+      {/* Overlay para fechar tela clicando fora de foco */}
       <Box onClick={() => setOpen(false)} sx={{
         position: 'absolute',
         height: '100vh',
@@ -36,6 +42,7 @@ const Navbar = () => {
       </>
       }
       
+      {/* Condição de aparição de ícone mobile */}
       {isMobile && (
         <Box 
           onClick={() => setOpen(p => !p)} 
@@ -55,15 +62,14 @@ const Navbar = () => {
   )
 }
 
-export default Navbar
-
-
+// Estrutura navbar
 const BigNav = ({open, setOpen} : {open:boolean, setOpen: () => void}) => {
 
-  const theme = useTheme()
-  const isSmall = useMediaQuery(theme.breakpoints.down('lg'))
-  const isMobile = useMediaQuery(theme.breakpoints.down('md'))
-  const navigate = useNavigate()
+  const theme = useTheme();
+  const navigate = useNavigate();
+
+  const isSmall = useMediaQuery(theme.breakpoints.down('lg')); // true quando media < 1200px
+  const isMobile = useMediaQuery(theme.breakpoints.down('md')); // true quando media < 900px
 
   return (
     <Box onClick={(e) => e.stopPropagation()} sx={{
@@ -95,22 +101,23 @@ const BigNav = ({open, setOpen} : {open:boolean, setOpen: () => void}) => {
             ':hover': {transform: 'scale(1.05)', cursor: 'pointer'},
             ':active': {transform: 'scale(0.95)'}
           }}
+          // Alternação entre as duas logos de acordo com media
           src={isSmall ? flugoLogoSm : flugoLogo}
         />
       </Box>
       
-      <Card setOpen={setOpen}>
-        Colaboradores
-      </Card>
+      <Card setOpen={setOpen}>Colaboradores</Card>
 
     </Box> 
   )
 }
 
 const Card = ({children, setOpen}: {children:string, setOpen: () => void}) => {
-  const navigate = useNavigate()
-  const theme = useTheme()
-  const isSmall = useMediaQuery(theme.breakpoints.down('lg'))
+
+  const navigate = useNavigate();
+  const theme = useTheme();
+
+  const isSmall = useMediaQuery(theme.breakpoints.down('lg')); // true quando media < 1200px
 
   return(
     <Box sx={{     
@@ -122,6 +129,7 @@ const Card = ({children, setOpen}: {children:string, setOpen: () => void}) => {
       justifyContent: {lg: 'space-between'},
       color: "text.secondary",
       transition: 'all 0.2s ease',
+      overflow: 'hidden',
       ":hover": {cursor: 'pointer', paddingLeft: isSmall ? 3 : 4, bgcolor: (theme) => theme.palette.text.disabled}
     }}>
       <Box onClick={() => {navigate('/'); setOpen()}} sx={{
@@ -144,3 +152,5 @@ const Card = ({children, setOpen}: {children:string, setOpen: () => void}) => {
     </Box>
   )
 }
+
+export default Navbar;

@@ -1,70 +1,101 @@
-// MUI
-import { Box, Button, FormControl, InputLabel, MenuItem, Select, TextField, Typography, useMediaQuery, useTheme, type SelectChangeEvent } from '@mui/material'
+// React
+import React, { useEffect, useState, type ReactNode } from 'react';
+import { useNavigate } from 'react-router-dom';
 
-// MUI Icons
+// MUI Assets
+import { Box, Button, FormControl, InputLabel, MenuItem, Select, TextField, Typography, useMediaQuery, useTheme, type SelectChangeEvent } from '@mui/material';
 import CheckCircleRoundedIcon from '@mui/icons-material/CheckCircleRounded';
 
-// Hooks
-import React, { useEffect, useState, type ReactNode } from 'react'
+// Componentes
 import MUISwitch from '../components/Switch';
 import PrimaryBtn from '../components/PrimaryBtn';
-import { useNavigate } from 'react-router-dom';
-import { postColaborador } from '../utils/postColaborador';
 
 // AOS Animation
-import AOS from 'aos'
-import 'aos/dist/aos.css'
+import AOS from 'aos';
+import 'aos/dist/aos.css';
 
+// Routes
+import { postColaborador } from '../utils/postColaborador';
+
+// Export da FormData
 export type FormData ={
-  nome: string
-  email: string
-  departamento: string
+  nome: string,
+  email: string,
+  departamento: string,
   status: boolean
 }
 
+// Criação de tipo flexível, reduzindo código verboso
 type PassoProps = {
-  passo: number
-  form?: FormData
-  setForm?: React.Dispatch<React.SetStateAction<FormData>>
+  passo: number,
+  form?: FormData,
+  setForm?: React.Dispatch<React.SetStateAction<FormData>>,
   children?: React.ReactNode
 }
 
+// Extensão para se encaixar ao PassoUm
 type PassoUmProps = PassoProps & {
-  erroEmail: boolean
+  erroEmail: boolean,
+  erroNome: boolean
 }
 
+// Formulário
 const Formulario = () => {
-  const [passo, setPasso] = useState(1)
-  const [erroEmail, setErroEmail] = useState(false)
+
+  const [passo, setPasso] = useState(1);
+  const [erroEmail, setErroEmail] = useState(false);
+  const [erroNome, setErroNome] = useState(false);
+
+  const navigate = useNavigate();
+
+  // Inicialização de form como obj
   const [form, setForm] = useState({
     nome: '',
     email: '',
     departamento: '',
     status: false
-  })
+  });
 
-  const isValidEmail = (email:string) => /^\S+[@]\S+(\.\S+)+$/.test(email)
-  const isValidNome = (nome: string) => /^[a-zA-ZÀ-ÿ\s]+$/.test(nome)
+  // Testes de regex para prevenção de inputs indesejados
+  const isValidEmail = (email:string) => /^\S+[@]\S+(\.\S+)+$/.test(email);
+  const isValidNome = (nome: string) => /^[a-zA-ZÀ-ÿ\s]+$/.test(nome);
   
   const isValid = () => {
-    if (passo === 1) return isValidNome(form.nome) && isValidEmail(form.email)
-    if (passo === 2) return form.departamento !== ''
+    if (passo === 1) return isValidNome(form.nome) && isValidEmail(form.email);
+    if (passo === 2) return form.departamento !== '';
     return true
-  }
+  };
 
+  // Caso clique com o botão ainda desabilitado
   const handleClick = () => {
+
     if(!isValidEmail(form.email)) {
-      setErroEmail(true)
+
+      setErroEmail(true);
+      setTimeout(() => {
+        setErroEmail(false)
+      }, 3000)
+
     }
-  }
 
-  const navigate = useNavigate()
+    if (!isValidNome(form.nome)) {
 
+      setErroNome(true);
+      setTimeout(() => {
+        setErroNome(false)
+      }, 3000)
+
+    }
+
+  };
+
+  // Handle do POST ao Firebase após "Concluido" 
   const handleSubmit = async () => {
     await postColaborador(form);
     return navigate("/");
   }
 
+  // Inicialização da biblioteca de animação
   useEffect(() => {
     AOS.init()
   }, [])
@@ -99,6 +130,7 @@ const Formulario = () => {
           justifyContent: 'space-around'
         }}>
 
+          {/* Barra de progresso */}
           <Box sx={{
             position: 'relative',
             borderRadius: 2,
@@ -106,13 +138,14 @@ const Formulario = () => {
             bgcolor: 'success.light'
           }}>
 
-            <Box sx={{
-              height: '100%',
-              position: 'absolute',
-              bgcolor: 'success.main',
-              transition: 'all 1s',
-              width: `${passo == 1 ? '0%' : passo == 2 ? '50%' : '100%' }`
-            }}>
+          <Box sx={{
+            height: '100%',
+            position: 'absolute',
+            bgcolor: 'success.main',
+            transition: 'all 1s',
+            width: `${passo == 1 ? '0%' : passo == 2 ? '50%' : '100%' }`
+          }}>
+          {/* ------------------- */}
 
             </Box>
 
@@ -129,6 +162,7 @@ const Formulario = () => {
           mt: 4
         }}>
 
+        {/* Índice de passo atual */}
         <StepTab passo={passo}/>
 
         <Box sx={{
@@ -136,7 +170,8 @@ const Formulario = () => {
           flexDirection: 'column'
         }}>
 
-          {passo === 1 && <PassoUm erroEmail={erroEmail} form={form} setForm={setForm} passo={passo}/>}
+          {/* Display dinâmico de acordo com "passo" para formulário */}
+          {passo === 1 && <PassoUm erroEmail={erroEmail} erroNome={erroNome} form={form} setForm={setForm} passo={passo}/>}
           {passo === 2 && <PassoDois form={form} setForm={setForm} passo={passo}/>}
           {passo === 3 && <PassoTres/>}
 
@@ -145,33 +180,36 @@ const Formulario = () => {
             justifyContent: passo > 1 ? 'space-between' : 'end',
             mt: 4
           }}>
-            {passo > 1 && <Button sx={{color:'text.primary', fontWeight: 600}} onClick={() => setPasso(passo - 1)}>Voltar</Button>}
+
+            {/* Botões */}
+            {passo > 1 && // Se user em passo 2+
+            <Button sx={{color:'text.primary', fontWeight: 600}} onClick={() => setPasso(passo - 1)}>Voltar</Button>}
             <Box onClick={handleClick}>
-              {
-              passo < 3 ? <Box data-aos="fade-in" data-aos-duration="500" data-aos-delay="150"><PrimaryBtn disabled={!isValid()} onClick={() => setPasso(passo + 1)}>Próximo</PrimaryBtn></Box>
-              :
+              {passo < 3 ? // Se em passo < 3
+              <Box data-aos="fade-in" data-aos-duration="500" data-aos-delay="150">
+                <PrimaryBtn disabled={!isValid()} onClick={() => setPasso(passo + 1)}>Próximo</PrimaryBtn>
+              </Box>
+              : // Se estiver em passo > 3 (display do botão "Concluir" ) 
               <Box onClick={handleSubmit}>
                 <PrimaryBtn disabled={!isValid()} onClick={() => setPasso(passo + 1)}>Concluir</PrimaryBtn> 
               </Box>
               }
+            {/* ------------------------- */}
+
             </Box>
           </Box>
-
         </Box>
-
         </Box>
-
       </Box>
-
     </>
   )
 }
 
 //Seção de passos:
-const PassoUm = ({form, setForm, erroEmail} : PassoUmProps) => {
+const PassoUm = ({form, setForm, erroEmail, erroNome} : PassoUmProps) => {
 
-  const [nomeError, setNomeError] = useState(false)
-  const nameNegator = /[^a-zA-ZÀ-ÿ\s]/g
+  const [nomeError, setNomeError] = useState(false);
+  const nameNegator = /[^a-zA-ZÀ-ÿ\s]/g;
 
   return (
     <PassoFrame title='Infos Básicas'>
@@ -180,25 +218,31 @@ const PassoUm = ({form, setForm, erroEmail} : PassoUmProps) => {
         flexDirection: 'column',
         gap: 3
       }}>
+
       <InputField
         info="Título"
         value={form!.nome}
-        error={nomeError}
-        errorCall='Caractere inválido'
+        error={erroNome || nomeError}
+        errorCall={erroNome ? 'Insira um nome' : 'caractere inválido'}
+        // Ao digitar, insere valor em val e testa de imediato para prever erro
         onChange={(e) => {
           const val = e.target.value;
           setNomeError(/[^a-zA-ZÀ-ÿ\s]/.test(val))
+          // Spread do obj formulário, alterando para e.target, não permitindo caracteres especiais (nameNegator)
           setForm!(prev => ({ ...prev, nome: e.target.value.replace(nameNegator, '') }));
           }}/>
+
         <InputField
           info="E-mail"
           value={form!.email}
           error={erroEmail}
           errorCall='Insira um e-mail válido!'
+          // Mesma lógica em input de nome..
           onChange={(e) => {
             const emailInput = e.target.value.toLocaleLowerCase();
             setForm!(prev => ({ ...prev, email: emailInput }));
           }}/>
+
       </Box>
 
       <Box sx={{
@@ -208,6 +252,7 @@ const PassoUm = ({form, setForm, erroEmail} : PassoUmProps) => {
         gap: 2
       }}>
 
+      {/* Switch atualiza o valor de status alternadamente p => !p */}
       <Box onClick={() => setForm!(prev => ({ ...prev, status: !prev.status }))}>
         <MUISwitch/>
       </Box>
@@ -216,13 +261,14 @@ const PassoUm = ({form, setForm, erroEmail} : PassoUmProps) => {
 
     </PassoFrame>
   )
-
 }
 
 const PassoDois = ({setForm, form} : PassoProps) => {
 
   return (
+
     <PassoFrame title='Infos Profissionais'>
+      {/* Foi necessário PropLifting para não ter conflito de eventos no componente */}
       <InputSelect value={form!.departamento} onChange={(e) => setForm!(prev => ({ ...prev, departamento: e.target.value }))}/>
     </PassoFrame>
   )
@@ -271,7 +317,7 @@ const PassoFrame = ({children, title} : {children: ReactNode, title?: string}) =
 
 }
 
-// Input de infos
+// Input de infos (text)
 const InputField = ({info, value, onChange, error, errorCall} : {
   info: string, 
   value: string, 
@@ -293,9 +339,10 @@ const InputField = ({info, value, onChange, error, errorCall} : {
   )
 }
 
-// Input select MUI
+// Input de infos (select)
 const InputSelect = ({onChange, value} : {onChange: (e: SelectChangeEvent) => void, value: string}) => {
 
+  // Disparando o evento ao parent
   const handleChange = (event: SelectChangeEvent) => {
     onChange(event);
   };
@@ -303,10 +350,10 @@ const InputSelect = ({onChange, value} : {onChange: (e: SelectChangeEvent) => vo
   return (
     <Box sx={{ minWidth: 120 }}>
       <FormControl fullWidth>
-        <InputLabel id="demo-simple-select-label">Departamento</InputLabel>
+        <InputLabel id="select-label">Departamento</InputLabel>
         <Select
-          labelId="demo-simple-select-label"
-          id="demo-simple-select"
+          labelId="select-label"
+          id="select"
           value={value}
           label="Departamento"
           onChange={handleChange}
@@ -321,14 +368,14 @@ const InputSelect = ({onChange, value} : {onChange: (e: SelectChangeEvent) => vo
   );
 }
 
-// Barra lateral do formulário
+// Componente índice de passo atual
 const StepTab = ({passo} : PassoProps) => {
   
   const theme = useTheme()
-  const isMobile = useMediaQuery(theme.breakpoints.down('sm'))
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm')) // True se media < 600px 
 
   return (
-              <Box data-aos="fade-right" data-aos-duration="500" data-aos-delay="100" sx={{
+          <Box data-aos="fade-right" data-aos-duration="500" data-aos-delay="100" sx={{
             display: 'flex',
             flexDirection: {sm: 'column', xs: 'row'},
             gap: {sm: 1, xs: 15},
@@ -437,4 +484,4 @@ const StepTab = ({passo} : PassoProps) => {
 
 }
 
-export default Formulario
+export default Formulario;

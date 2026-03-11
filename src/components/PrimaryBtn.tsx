@@ -1,6 +1,10 @@
-import { Button } from '@mui/material'
-import { useNavigate } from 'react-router-dom'
+// React
+import { useNavigate } from 'react-router-dom';
 
+// MUI assets
+import { Button } from '@mui/material';
+
+// Type para props
 type BtnProps = {
 
   children: string,
@@ -8,17 +12,20 @@ type BtnProps = {
   onClick?: () => void,
   disabled?: boolean
 
-}
+};
 
+// Botão principal
 const PrimaryBtn = ({children, to, onClick, disabled}: BtnProps) => {
 
-  const navigate = useNavigate()
+  const navigate = useNavigate();
 
   return (
     <Button
       variant="contained"
       color="primary"
       disabled={disabled}
+
+      // to: string de rota de destino, ou, na ausência, outra funcção
       onClick={to ? () => navigate(to) : onClick }
       sx={{
         textTransform: "none",
@@ -36,4 +43,4 @@ const PrimaryBtn = ({children, to, onClick, disabled}: BtnProps) => {
   )
 }
 
-export default PrimaryBtn
+export default PrimaryBtn;

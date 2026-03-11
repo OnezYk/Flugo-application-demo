@@ -1,10 +1,16 @@
-import { StrictMode } from 'react'
-import { createRoot } from 'react-dom/client'
-import App from './App.tsx'
-import { ThemeProvider } from '@mui/material/styles'
-import { createTheme } from '@mui/material'
-import { BrowserRouter } from 'react-router-dom'
+// React
+import { StrictMode } from 'react';
+import { createRoot } from 'react-dom/client';
+import { BrowserRouter } from 'react-router-dom';
 
+// MUI
+import { ThemeProvider } from '@mui/material/styles';
+import { createTheme } from '@mui/material';
+
+// Componentes
+import App from './App.tsx';
+
+// Definição da paleta de cores
 const theme = createTheme({
   palette: {
     primary: { 

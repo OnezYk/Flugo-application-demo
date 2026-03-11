@@ -4,18 +4,3 @@ html, body, #root {
     height: 100%;
     overflow: hidden;
   }
-
-.imgCover {
-  width: 100px;
-  transition: all 0.2s;
-}
-
-.imgCover:hover {
-  transform: scale(1.05);
-  cursor: pointer;
-}
-
-.imgCover:active {
-  transform: scale(0.95);
-  cursor: pointer;
-}

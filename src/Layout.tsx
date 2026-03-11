@@ -1,22 +1,31 @@
-import { Avatar, Box, useMediaQuery} from "@mui/material";
-import Navbar from "./components/Navbar.tsx"
+// React
 import { Outlet } from "react-router-dom";
+
+// MUI assets
+import { Avatar, Box, useMediaQuery} from "@mui/material";
+
+// Avatares
 import { notionists } from '@dicebear/collection';
 import { createAvatar } from "@dicebear/core";
 
+// Componentes
+import Navbar from "./components/Navbar.tsx";
+
+// Criação de um avatar random
 const avatar = createAvatar(notionists, { 
   seed: 'Amanda',
   backgroundColor: ['2ec1f2']
  }).toDataUri();
 
-export const Layout = () => {
+// Layout persistente entre páginas
+const Layout = () => {
 
-  const isSmall = useMediaQuery('(max-width: 660px)')
+  // True quando media < 660
+  const isSmall = useMediaQuery('(max-width: 660px)');
 
   return (
     <Box sx={{ display: "flex", height: "100vh", overflow: "hidden"}}>
       
-
       <Navbar />
 
       <Box sx={{ display: "flex", flexDirection: "column", flex: 1}}>
@@ -50,3 +59,5 @@ export const Layout = () => {
     </Box>
   );
 };
+
+export default Layout;
