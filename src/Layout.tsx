@@ -2,7 +2,7 @@
 import { Outlet } from "react-router-dom";
 
 // MUI assets
-import { Avatar, Box} from "@mui/material";
+import { Avatar, Box, useMediaQuery} from "@mui/material";
 
 // Avatares
 import { notionists } from '@dicebear/collection';
@@ -20,8 +20,10 @@ const avatar = createAvatar(notionists, {
 // Layout persistente entre páginas
 const Layout = () => {
 
+  const isXSmall = useMediaQuery('(max-width: 400px)');
+
   return (
-    <Box sx={{ display: "flex", height: "100vh", overflow: "hidden"}}>
+    <Box sx={{ display: "flex", height: "100vh", width: isXSmall ? '125%' : '100%', overflow: "hidden", transform: isXSmall ? 'scale(0.8)' : 'scale(1)', position: 'relative', right: isXSmall ? 40 : 0}}>
       
       <Navbar />
 
