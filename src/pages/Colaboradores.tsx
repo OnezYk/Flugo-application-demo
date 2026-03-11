@@ -10,6 +10,7 @@ import {
   Chip,
   Box,
   Typography,
+  useMediaQuery,
 } from "@mui/material";
 
 // MUI icons
@@ -28,13 +29,16 @@ type ColaboradorProp = FormData & { id: string }
 
 const Colaboradores = () => {
 
+  const isSmall = useMediaQuery('(max-width: 660px)')
+
   return (
     <Box
       sx={{
-        height: "100%",
         p: 4,
-        flexGrow: 1,
-        overflow: "hidden",
+        flexGrow: 0,
+        ml: {lg: '300px', md: '100px', xs: 0},
+        transform: !isSmall ?'scale(1)':'scale(0.8)',
+        transition: 'all 1s'
       }}
     >
       <Box
@@ -98,6 +102,8 @@ const ColaboradoresTable = () => {
         borderColor: "text.disabled",
         borderRadius: 2,
         marginTop: 2,
+        maxHeight: 'calc(100vh - 200px)',
+        overflowY: 'scroll',
       }}
     >
       <Table>

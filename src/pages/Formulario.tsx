@@ -1,5 +1,5 @@
 // MUI
-import { Box, Button, FormControl, InputLabel, MenuItem, Select, TextField, Typography, type SelectChangeEvent } from '@mui/material'
+import { Box, Button, FormControl, InputLabel, MenuItem, Select, TextField, Typography, useMediaQuery, useTheme, type SelectChangeEvent } from '@mui/material'
 
 // MUI Icons
 import CheckCircleRoundedIcon from '@mui/icons-material/CheckCircleRounded';
@@ -66,12 +66,14 @@ const Formulario = () => {
       <Box sx={{
         m: 4,
         mr: 5,
+        ml: {lg: '340px', md: '140px', xs: '40px'},
         display: 'flex',
         flexDirection: 'column',
         color: 'text.primary',
       }}>
         <Typography sx={{
           fontWeight: 600,
+          textAlign: {sm: 'start', xs: 'center'},
         }}>Colaboradores
           <Typography component="span" sx={{ml: 2, color: 'text.secondary', fontWeight: 400 }}>
           •
@@ -82,12 +84,13 @@ const Formulario = () => {
         
         <Box sx={{
           mt: 2,
-          display: 'grid',
-          gridTemplateColumns: '97% 1fr',
+          display: {sm:'grid'},
+          gridTemplateColumns: {sm: '97% 1fr'},
           gap: 2,
           alignItems: 'center',
           justifyContent: 'space-around'
         }}>
+
           <Box sx={{
             position: 'relative',
             borderRadius: 2,
@@ -107,13 +110,14 @@ const Formulario = () => {
 
           </Box>
 
-          <Typography> { passo == 1 ? '0%' : passo == 2 ? '50%' : '100%' } </Typography>
+          <Typography sx={{textAlign: 'center'}}> { passo == 1 ? '0%' : passo == 2 ? '50%' : '100%' } </Typography>
 
         </Box>
 
         <Box sx={{
           display: 'grid',
-          gridTemplateColumns: '15% 1fr',
+          gridTemplateColumns: {sm: '200px 1fr', xs: '1fr'},
+          gridTemplateRows: {sm: 'auto', xs: '200px, 200px'},
           mt: 4
         }}>
 
@@ -130,9 +134,10 @@ const Formulario = () => {
 
           <Box  sx={{
             display: 'flex',
-            justifyContent: passo > 1 ? 'space-between' : 'end'
+            justifyContent: passo > 1 ? 'space-between' : 'end',
+            mt: 4
           }}>
-            {passo > 1 && <Button onClick={() => setPasso(passo - 1)}>Voltar</Button>}
+            {passo > 1 && <Button sx={{color:'text.primary', fontWeight: 600}} onClick={() => setPasso(passo - 1)}>Voltar</Button>}
             <Box onClick={handleClick}>
               {
               passo < 3 ? <PrimaryBtn disabled={!isValid()} onClick={() => setPasso(passo + 1)}>Próximo</PrimaryBtn> 
@@ -220,7 +225,8 @@ const PassoTres = () => {
   return (
     <PassoFrame title='Parabéns!'>
       <Typography sx={{
-        fontWeight: '600'
+        fontWeight: '600',
+        textAlign: {sm: 'start', xs: 'center'}
       }}>Cadastro realizado com sucesso!</Typography>
     </PassoFrame>
   )
@@ -234,7 +240,7 @@ const PassoFrame = ({children, title} : {children: ReactNode, title?: string}) =
 
   return (
     <Box sx={{
-      minHeight: '500px',
+      minHeight: {sm:'400px', xs:'300'},
     }}> 
     
       <Typography sx={{
@@ -243,7 +249,8 @@ const PassoFrame = ({children, title} : {children: ReactNode, title?: string}) =
         mb:4,
         fontWeight: 600,
         fontSize: 25,
-        color: 'text.secondary'
+        color: 'text.secondary',
+        textAlign: {sm: 'start', xs: 'center'}
       }}> 
       {title}
       </Typography> 
@@ -270,6 +277,7 @@ const InputField = ({info, value, onChange, error, errorCall} : {
       fullWidth
       error={error}
       helperText={error ? errorCall : ''}
+      autoComplete='off'
       value={value}
       onChange={onChange}
     />
@@ -306,12 +314,16 @@ const InputSelect = ({onChange, value} : {onChange: (e: SelectChangeEvent) => vo
 
 // Barra lateral do formulário
 const StepTab = ({passo} : PassoProps) => {
+  
+  const theme = useTheme()
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'))
 
   return (
               <Box sx={{
             display: 'flex',
-            flexDirection: 'column',
-            gap: 1,
+            flexDirection: {sm: 'column', xs: 'row'},
+            gap: {sm: 1, xs: 15},
+            mb: {sm:0, xs:3}
           }}>
 
           <Box sx={{
@@ -360,13 +372,15 @@ const StepTab = ({passo} : PassoProps) => {
 
           </Box>
           
-          <Box sx={{
-            bgcolor: `${passo == 1 ? 'text.disabled' : passo == 2 ? 'text.secondary' : 'success.main'}`,
-            width: 2,
-            minHeight: `${passo == 1 ? '100px' : passo == 2 ? '50px' : '0px'}`,
-            ml: 1.5,
-            transition: 'all 1s ease'
-          }}></Box>
+          {!isMobile &&
+            <Box sx={{
+              bgcolor: `${passo == 1 ? 'text.disabled' : passo == 2 ? 'text.secondary' : 'success.main'}`,
+              width: 2,
+              minHeight: `${passo == 1 ? '100px' : passo == 2 ? '50px' : '0px'}`,
+              ml: 1.5,
+              transition: 'all 1s ease'
+            }}></Box>          
+            }
 
             <Box sx={{
               display: 'flex',
