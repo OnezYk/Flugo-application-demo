@@ -24,6 +24,9 @@ const theme = createTheme({
       primary: '#1a1f22',
       secondary: '#637381',
       disabled: '#f0f2f5'
+    },
+    action: {
+      hover: '#c3c4c7'
     }
   }
 });

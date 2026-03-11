@@ -21,7 +21,7 @@ import { notionists } from '@dicebear/collection';
 import PrimaryBtn from "../components/PrimaryBtn";
 
 // My utils
-import getColaboradores from '../utils/getColaborador'
+import {getColaboradores} from '../utils/getColaborador'
 import { useEffect, useState } from "react";
 import type { FormData } from "./Formulario";
 type ColaboradorProp = FormData & { id: string }
@@ -67,6 +67,7 @@ const Colaboradores = () => {
 const ColaboradoresTable = () => {
 
   const [colaboradores, setColaboradores] = useState<ColaboradorProp[]>([])
+  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc')
 
   useEffect(() => {
 
@@ -80,6 +81,15 @@ const ColaboradoresTable = () => {
       backgroundColor: ['b6e3f4', 'c0aede', 'd1d4f9', 'ffd5dc', 'ffdfbf']
     }).toString();
   }
+  
+  
+  const handleGetColaborador = (col: string) => {
+  const field = col.toLowerCase()
+  const newOrder = sortOrder === 'asc' ? 'desc' : 'asc'
+  console.log(sortOrder)
+  setSortOrder(newOrder)
+  getColaboradores(field, newOrder).then(data => setColaboradores(data))
+}
 
   return (
     <TableContainer
@@ -95,13 +105,16 @@ const ColaboradoresTable = () => {
           <TableRow sx={{bgcolor: "text.disabled"}}>
             {["Nome", "Email", "Departamento", "Status"].map((col) => (
               <TableCell
+                onClick={() => handleGetColaborador(col)}
                 key={col}
                 sx={{
                   fontWeight: 600,
                   color: "text.secondary",
                   textAlign: col === "Status" ? "right" : "left",
+                  transition: 'all 0.2s',
+                  ':hover': {cursor: 'pointer', bgcolor: 'action.hover'},
                 }}
-              >
+                >
                 <Box
                   sx={{
                     display: "flex",
