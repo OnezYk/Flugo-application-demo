@@ -5,11 +5,12 @@ type BtnProps = {
 
   children: string,
   to?: string,
-  onClick?: () => void
+  onClick?: () => void,
+  disabled?: boolean
 
 }
 
-const PrimaryBtn = ({children, to, onClick}: BtnProps) => {
+const PrimaryBtn = ({children, to, onClick, disabled}: BtnProps) => {
 
   const navigate = useNavigate()
 
@@ -17,6 +18,7 @@ const PrimaryBtn = ({children, to, onClick}: BtnProps) => {
     <Button
       variant="contained"
       color="primary"
+      disabled={disabled}
       onClick={to ? () => navigate(to) : onClick }
       sx={{
         textTransform: "none",

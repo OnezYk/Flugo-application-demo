@@ -1,12 +1,14 @@
 // MUI
-import { Box, Button, TextField, Typography } from '@mui/material'
+import { Box, Button, FormControl, InputLabel, MenuItem, Select, TextField, Typography, type SelectChangeEvent } from '@mui/material'
 
 // MUI Icons
 import CheckCircleRoundedIcon from '@mui/icons-material/CheckCircleRounded';
 
 // Hooks
-import { useState, type ReactNode } from 'react'
+import React, { useState, type ReactNode } from 'react'
 import MUISwitch from '../components/Switch';
+import PrimaryBtn from '../components/PrimaryBtn';
+import { useNavigate } from 'react-router-dom';
 
 type FormData ={
   nome: string
@@ -22,14 +24,40 @@ type PassoProps = {
   children?: React.ReactNode
 }
 
+type PassoUmProps = PassoProps & {
+  erroEmail: boolean
+}
+
 const Formulario = () => {
   const [passo, setPasso] = useState(1)
+  const [erroEmail, setErroEmail] = useState(false)
   const [form, setForm] = useState({
     nome: '',
     email: '',
     departamento: '',
     status: false
   })
+
+  const isValidEmail = (email:string) => /\w+[@]\w+(\.\w+)+/.test(email)
+  const isValidNome = (nome: string) => /^[a-zA-ZÀ-ÿ\s]+$/.test(nome)
+  
+  const isValid = () => {
+    if (passo === 1) return isValidNome(form.nome) && isValidEmail(form.email)
+    if (passo === 2) return form.departamento !== ''
+    return true
+  }
+
+  const handleClick = () => {
+    if(!isValidEmail(form.email)) {
+      setErroEmail(true)
+    }
+  }
+
+  const navigate = useNavigate()
+
+  const handleSubmit = () => {
+    navigate("/");
+  }
 
   return (
     <>
@@ -77,7 +105,7 @@ const Formulario = () => {
 
           </Box>
 
-          <Typography> 0% </Typography>
+          <Typography> { passo == 1 ? '0%' : passo == 2 ? '50%' : '100%' } </Typography>
 
         </Box>
 
@@ -88,24 +116,47 @@ const Formulario = () => {
         }}>
 
         <StepTab passo={passo}/>
-        {passo === 1 && <PassoUm form={form} setForm={setForm} passo={passo}/>}
-        {passo === 2 && <PassoDois passo={passo}/>}
-        {passo === 3 && <PassoTres passo={passo}/>}
+
+        <Box sx={{
+          display: 'flex',
+          flexDirection: 'column'
+        }}>
+
+          {passo === 1 && <PassoUm erroEmail={erroEmail} form={form} setForm={setForm} passo={passo}/>}
+          {passo === 2 && <PassoDois form={form} setForm={setForm} passo={passo}/>}
+          {passo === 3 && <PassoTres/>}
+
+          <Box  sx={{
+            display: 'flex',
+            justifyContent: passo > 1 ? 'space-between' : 'end'
+          }}>
+            {passo > 1 && <Button onClick={() => setPasso(passo - 1)}>Voltar</Button>}
+            <Box onClick={handleClick}>
+              {
+              passo < 3 ? <PrimaryBtn disabled={!isValid()} onClick={() => setPasso(passo + 1)}>Próximo</PrimaryBtn> 
+              :
+              <Box onClick={handleSubmit}>
+                <PrimaryBtn disabled={!isValid()} onClick={() => setPasso(passo + 1)}>Concluir</PrimaryBtn> 
+              </Box>
+              }
+            </Box>
+          </Box>
+
+        </Box>
 
         </Box>
 
       </Box>
-      <Box>
-      </Box>
 
-      <Button onClick={() => setPasso(passo + 1)}>Próximo</Button>
-      {passo > 1 && <Button onClick={() => setPasso(passo - 1)}>Voltar</Button>}
     </>
   )
 }
 
 //Seção de passos:
-const PassoUm = ({form, setForm} : PassoProps) => {
+const PassoUm = ({form, setForm, erroEmail} : PassoUmProps) => {
+
+  const [nomeError, setNomeError] = useState(false)
+  const nameNegator = /[^a-zA-ZÀ-ÿ\s]/g
 
   return (
     <PassoFrame title='Infos Básicas'>
@@ -114,14 +165,24 @@ const PassoUm = ({form, setForm} : PassoProps) => {
         flexDirection: 'column',
         gap: 3
       }}>
-        <InputField
-          info="Título"
-          value={form!.nome}
-          onChange={(e) => setForm!(prev => ({ ...prev, nome: e.target.value }))}/>
+      <InputField
+        info="Título"
+        value={form!.nome}
+        error={nomeError}
+        errorCall='Caractere inválido'
+        onChange={(e) => {
+          const val = e.target.value;
+          setNomeError(/[^a-zA-ZÀ-ÿ\s]/.test(val))
+          setForm!(prev => ({ ...prev, nome: e.target.value.replace(nameNegator, '') }));
+          }}/>
         <InputField
           info="E-mail"
           value={form!.email}
-          onChange={(e) => setForm!(prev => ({ ...prev, email: e.target.value }))}/>
+          error={erroEmail}
+          errorCall='Insira um e-mail válido!'
+          onChange={(e) => {
+            setForm!(prev => ({ ...prev, email: e.target.value }));
+          }}/>
       </Box>
 
       <Box sx={{
@@ -130,7 +191,10 @@ const PassoUm = ({form, setForm} : PassoProps) => {
         alignItems: 'center',
         gap: 2
       }}>
+
+      <Box onClick={() => setForm!(prev => ({ ...prev, status: !prev.status }))}>
         <MUISwitch/>
+      </Box>
         <Typography>Ativar ao criar</Typography>
       </Box>
 
@@ -139,37 +203,32 @@ const PassoUm = ({form, setForm} : PassoProps) => {
 
 }
 
-const PassoDois = ({form, setForm} : PassoProps) => {
+const PassoDois = ({setForm, form} : PassoProps) => {
 
   return (
     <PassoFrame title='Infos Profissionais'>
-      <Box sx={{
-        display: 'flex',
-        flexDirection: 'column',
-        gap: 3
-      }}>
-        <InputField
-          info="Título"
-          value={form!.nome}
-          onChange={(e) => setForm!(prev => ({ ...prev, nome: e.target.value }))}/>
-      </Box>
-
+      <InputSelect value={form!.departamento} onChange={(e) => setForm!(prev => ({ ...prev, departamento: e.target.value }))}/>
     </PassoFrame>
   )
 
 }
 
-const PassoTres = ({passo} : PassoProps) => {
+const PassoTres = () => {
 
   return (
-    <PassoFrame passo={passo}></PassoFrame>
+    <PassoFrame title='Parabéns!'>
+      <Typography sx={{
+        fontWeight: '600'
+      }}>Cadastro realizado com sucesso!</Typography>
+    </PassoFrame>
   )
 
 }
+
 //-----------------------------------------------------
 
 //Corpo principal do formulário
-const PassoFrame = ({children, title} : {children: ReactNode, title: string}) => {
+const PassoFrame = ({children, title} : {children: ReactNode, title?: string}) => {
 
   return (
     <Box sx={{
@@ -179,7 +238,7 @@ const PassoFrame = ({children, title} : {children: ReactNode, title: string}) =>
       <Typography sx={{
         position: 'relative',
         bottom: 3,
-        mb:3,
+        mb:4,
         fontWeight: 600,
         fontSize: 25,
         color: 'text.secondary'
@@ -195,20 +254,52 @@ const PassoFrame = ({children, title} : {children: ReactNode, title: string}) =>
 }
 
 // Input de infos
-const InputField = ({info, value, onChange} : {
+const InputField = ({info, value, onChange, error, errorCall} : {
   info: string, 
   value: string, 
-  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void
+  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void,
+  error: boolean,
+  errorCall: string
 }) => {
   return (
     <TextField
       label={info}
       variant="outlined"
       fullWidth
+      error={error}
+      helperText={error ? errorCall : ''}
       value={value}
       onChange={onChange}
     />
   )
+}
+
+// Input select MUI
+const InputSelect = ({onChange, value} : {onChange: (e: SelectChangeEvent) => void, value: string}) => {
+
+  const handleChange = (event: SelectChangeEvent) => {
+    onChange(event);
+  };
+
+  return (
+    <Box sx={{ minWidth: 120 }}>
+      <FormControl fullWidth>
+        <InputLabel id="demo-simple-select-label">Departamento</InputLabel>
+        <Select
+          labelId="demo-simple-select-label"
+          id="demo-simple-select"
+          value={value}
+          label="Departamento"
+          onChange={handleChange}
+        >
+          <MenuItem value={"Design"}>Design</MenuItem>
+          <MenuItem value={"TI"}>TI</MenuItem>
+          <MenuItem value={"Marketing"}>Marketing</MenuItem>
+          <MenuItem value={"Produto"}>Produto</MenuItem>
+        </Select>
+      </FormControl>
+    </Box>
+  );
 }
 
 // Barra lateral do formulário
