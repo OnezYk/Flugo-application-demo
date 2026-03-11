@@ -11,10 +11,15 @@ import {
   Box,
   Typography,
   useMediaQuery,
+  Fade,
 } from "@mui/material";
 
 // MUI icons
 import SouthRoundedIcon from "@mui/icons-material/SouthRounded";
+
+// AOS Animation
+import AOS from 'aos'
+import 'aos/dist/aos.css'
 
 // Notionists
 import { createAvatar } from '@dicebear/core';
@@ -29,7 +34,11 @@ type ColaboradorProp = FormData & { id: string }
 
 const Colaboradores = () => {
 
-  const isSmall = useMediaQuery('(max-width: 660px)')
+  const isSmall = useMediaQuery('(max-width: 660px)');
+
+  useEffect(() => {
+    AOS.init()
+  }, [])
 
   return (
     <Box
@@ -55,11 +64,14 @@ const Colaboradores = () => {
             fontSize: 27,
             fontWeight: 600,
           }}
+          data-aos="fade-right" data-aos-duration="800"
         >
           Colaboradores
         </Typography>
 
-        <PrimaryBtn to="/formulario"> Novo Colaborador </PrimaryBtn>
+        <Box data-aos="fade-right" data-aos-duration="800" data-aos-delay="250">
+          <PrimaryBtn to="/formulario"> Novo Colaborador </PrimaryBtn>
+        </Box>
 
       </Box>
 
@@ -76,7 +88,7 @@ const ColaboradoresTable = () => {
   useEffect(() => {
 
     getColaboradores().then(data => setColaboradores(data));
-
+    
   },[])
 
   const getAvatar = (seed: string) => {
@@ -90,13 +102,13 @@ const ColaboradoresTable = () => {
   const handleGetColaborador = (col: string) => {
   const field = col.toLowerCase()
   const newOrder = sortOrder === 'asc' ? 'desc' : 'asc'
-  console.log(sortOrder)
+
   setSortOrder(newOrder)
   getColaboradores(field, newOrder).then(data => setColaboradores(data))
 }
 
   return (
-    <TableContainer
+    <TableContainer data-aos="fade-in" data-aos-duration="800"
       sx={{
         boxShadow: 3,
         borderColor: "text.disabled",
@@ -138,32 +150,34 @@ const ColaboradoresTable = () => {
         </TableHead>
 
         <TableBody>
-          {colaboradores.map((row:ColaboradorProp) => (
-            <TableRow key={row.id} sx={{"&:last-child td": {border: 0}}}>
-              <TableCell>
-                <Box sx={{display: "flex", alignItems: "center", gap: 1.5}}>
-                  <Avatar src={`data:image/svg+xml;utf8,${encodeURIComponent(getAvatar(row.nome))}`} sx={{width: 36, height: 36}} />
-                  <Typography fontWeight={500}>{row.nome}</Typography>
-                </Box>
-              </TableCell>
-              <TableCell>{row.email}</TableCell>
-              <TableCell>{row.departamento}</TableCell>
-              <TableCell sx={{textAlign: "right"}}>
-                <Chip
-                  label={row.status ? "Ativo" : "Inativo"}
-                  size="small"
-                  sx={{
-                    borderRadius: 1.5,
-                    bgcolor:
-                      row.status ? 'success.light' : "error.light",
-                    color:
-                      row.status ? "success.main" : "error.main",
-                    fontWeight: 600,
-                    fontSize: 12,
-                  }}
-                />
-              </TableCell>
-            </TableRow>
+          {colaboradores.map((row:ColaboradorProp, index) => (
+            <Fade in={true} timeout={300 + index * 200} key={row.id}>
+              <TableRow key={row.id} sx={{"&:last-child td": {border: 0}}}>
+                <TableCell>
+                  <Box sx={{display: "flex", alignItems: "center", gap: 1.5}}>
+                    <Avatar src={`data:image/svg+xml;utf8,${encodeURIComponent(getAvatar(row.nome))}`} sx={{width: 36, height: 36}} />
+                    <Typography fontWeight={500}>{row.nome}</Typography>
+                  </Box>
+                </TableCell>
+                <TableCell>{row.email}</TableCell>
+                <TableCell>{row.departamento}</TableCell>
+                <TableCell sx={{textAlign: "right"}}>
+                  <Chip
+                    label={row.status ? "Ativo" : "Inativo"}
+                    size="small"
+                    sx={{
+                      borderRadius: 1.5,
+                      bgcolor:
+                        row.status ? 'success.light' : "error.light",
+                      color:
+                        row.status ? "success.main" : "error.main",
+                      fontWeight: 600,
+                      fontSize: 12,
+                    }}
+                  />
+                </TableCell>
+              </TableRow>
+            </Fade>
           ))}
         </TableBody>
       </Table>

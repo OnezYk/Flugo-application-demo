@@ -5,11 +5,15 @@ import { Box, Button, FormControl, InputLabel, MenuItem, Select, TextField, Typo
 import CheckCircleRoundedIcon from '@mui/icons-material/CheckCircleRounded';
 
 // Hooks
-import React, { useState, type ReactNode } from 'react'
+import React, { useEffect, useState, type ReactNode } from 'react'
 import MUISwitch from '../components/Switch';
 import PrimaryBtn from '../components/PrimaryBtn';
 import { useNavigate } from 'react-router-dom';
 import { postColaborador } from '../utils/postColaborador';
+
+// AOS Animation
+import AOS from 'aos'
+import 'aos/dist/aos.css'
 
 export type FormData ={
   nome: string
@@ -61,6 +65,10 @@ const Formulario = () => {
     return navigate("/");
   }
 
+  useEffect(() => {
+    AOS.init()
+  }, [])
+
   return (
     <>
       <Box sx={{
@@ -71,7 +79,7 @@ const Formulario = () => {
         flexDirection: 'column',
         color: 'text.primary',
       }}>
-        <Typography sx={{
+        <Typography data-aos="fade-right" data-aos-duration='500' sx={{
           fontWeight: 600,
           textAlign: {sm: 'start', xs: 'center'},
         }}>Colaboradores
@@ -82,7 +90,7 @@ const Formulario = () => {
       
         </Typography>
         
-        <Box sx={{
+        <Box data-aos="fade-in" data-aos-duration="800" sx={{
           mt: 2,
           display: {sm:'grid'},
           gridTemplateColumns: {sm: '97% 1fr'},
@@ -140,7 +148,7 @@ const Formulario = () => {
             {passo > 1 && <Button sx={{color:'text.primary', fontWeight: 600}} onClick={() => setPasso(passo - 1)}>Voltar</Button>}
             <Box onClick={handleClick}>
               {
-              passo < 3 ? <PrimaryBtn disabled={!isValid()} onClick={() => setPasso(passo + 1)}>Próximo</PrimaryBtn> 
+              passo < 3 ? <Box data-aos="fade-in" data-aos-duration="500" data-aos-delay="150"><PrimaryBtn disabled={!isValid()} onClick={() => setPasso(passo + 1)}>Próximo</PrimaryBtn></Box>
               :
               <Box onClick={handleSubmit}>
                 <PrimaryBtn disabled={!isValid()} onClick={() => setPasso(passo + 1)}>Concluir</PrimaryBtn> 
@@ -188,7 +196,8 @@ const PassoUm = ({form, setForm, erroEmail} : PassoUmProps) => {
           error={erroEmail}
           errorCall='Insira um e-mail válido!'
           onChange={(e) => {
-            setForm!(prev => ({ ...prev, email: e.target.value }));
+            const emailInput = e.target.value.toLocaleLowerCase();
+            setForm!(prev => ({ ...prev, email: emailInput }));
           }}/>
       </Box>
 
@@ -239,7 +248,7 @@ const PassoTres = () => {
 const PassoFrame = ({children, title} : {children: ReactNode, title?: string}) => {
 
   return (
-    <Box sx={{
+    <Box data-aos="fade-in" data-aos-duration="500" data-aos-delay="150" sx={{
       minHeight: {sm:'400px', xs:'300'},
     }}> 
     
@@ -319,7 +328,7 @@ const StepTab = ({passo} : PassoProps) => {
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'))
 
   return (
-              <Box sx={{
+              <Box data-aos="fade-right" data-aos-duration="500" data-aos-delay="100" sx={{
             display: 'flex',
             flexDirection: {sm: 'column', xs: 'row'},
             gap: {sm: 1, xs: 15},
