@@ -22,7 +22,7 @@ const Navbar = () => {
 
   
   const isMobile = useMediaQuery(theme.breakpoints.down('md')); // true quando media < 900px
-  const isSmall = useMediaQuery('(max-width: 660px)'); // true quando media < 660px
+  const isXSmall = useMediaQuery('(max-width: 500px)'); // true quando media < 500px
 
   return (
     <>
@@ -49,7 +49,7 @@ const Navbar = () => {
           sx={{
             position: 'absolute', 
             top: 20, 
-            left: !isSmall ? {sm: 'calc(5% - 10px)'} : 80,
+            left: !isXSmall ? {sm: 'calc(5% - 10px)', xs: 45} : 35,
             color: 'text.primary', 
             transition: 'all 0.3s ease',
             ':hover': {cursor: "pointer"}

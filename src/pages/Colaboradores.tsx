@@ -27,6 +27,7 @@ import {getColaboradores} from '../utils/getColaborador';
 const Colaboradores = () => {
 
   const isSmall = useMediaQuery('(max-width: 660px)'); // True quando media < 660px
+  const isXSmall = useMediaQuery('(max-width: 500px)'); // True quando media < 660px
 
   // Inicialização da biblioteca de animação
   useEffect(() => {
@@ -36,7 +37,9 @@ const Colaboradores = () => {
   return (
     <Box
       sx={{
-        p: 4,
+        position: 'relative',
+        right: isXSmall ? 5 : 0,
+        p: isSmall ? 0 : 3,
         flexGrow: 0,
         ml: {lg: '300px', md: '100px', xs: 0},
         transform: !isSmall ?'scale(1)':'scale(0.8)',
@@ -197,10 +200,11 @@ const ColaboradoresTable = () => {
     </TableContainer> 
     : // Caso não há colaboradores na Firestore ->
     <Typography data-aos="fade-right" data-aos-delay="150" data-aos-duration="800" variant="h2" sx={{
-      mt:2,
+      mt: {sm:2, xs:7},
       fontSize: 20,
       fontWeight: 600,
-      color: 'text.secondary'
+      color: 'text.secondary',
+      textAlign: {sm: 'start', xs: 'center'},
     }}>Sem colaboradores por enquanto, experimente cadastrar um!</Typography>}
     </>
   );

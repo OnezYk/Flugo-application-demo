@@ -2,7 +2,7 @@
 import { Outlet } from "react-router-dom";
 
 // MUI assets
-import { Avatar, Box, useMediaQuery} from "@mui/material";
+import { Avatar, Box} from "@mui/material";
 
 // Avatares
 import { notionists } from '@dicebear/collection';
@@ -19,9 +19,6 @@ const avatar = createAvatar(notionists, {
 
 // Layout persistente entre páginas
 const Layout = () => {
-
-  // True quando media < 660
-  const isSmall = useMediaQuery('(max-width: 660px)');
 
   return (
     <Box sx={{ display: "flex", height: "100vh", overflow: "hidden"}}>
@@ -44,7 +41,7 @@ const Layout = () => {
             width: 40,
             height: 40, 
             transition: 'all 0.2s', 
-            mr: !isSmall ? 0 : 7,
+            mr: {sm: 0, xs: 2.5},
             ':hover': {transform: 'scale(1.15)',cursor: 'pointer'}, 
             ':active': {transform: 'scale(0.95)'
             

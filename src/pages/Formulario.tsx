@@ -3,7 +3,7 @@ import React, { useEffect, useState, type ReactNode } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 // MUI Assets
-import { Box, Button, FormControl, InputLabel, MenuItem, Select, TextField, Typography, useMediaQuery, useTheme, type SelectChangeEvent } from '@mui/material';
+import { Box, Button, Fade, FormControl, InputLabel, MenuItem, Select, TextField, Typography, useMediaQuery, useTheme, type SelectChangeEvent } from '@mui/material';
 import CheckCircleRoundedIcon from '@mui/icons-material/CheckCircleRounded';
 
 // Componentes
@@ -186,9 +186,11 @@ const Formulario = () => {
             <Button sx={{color:'text.primary', fontWeight: 600}} onClick={() => setPasso(passo - 1)}>Voltar</Button>}
             <Box onClick={handleClick}>
               {passo < 3 ? // Se em passo < 3
-              <Box data-aos="fade-in" data-aos-duration="500" data-aos-delay="150">
-                <PrimaryBtn disabled={!isValid()} onClick={() => setPasso(passo + 1)}>Próximo</PrimaryBtn>
-              </Box>
+              <Fade in={true} timeout={500}>
+                <Box>
+                  <PrimaryBtn disabled={!isValid()} onClick={() => setPasso(passo + 1)}>Próximo</PrimaryBtn>
+                </Box>
+              </Fade>
               : // Se estiver em passo > 3 (display do botão "Concluir" ) 
               <Box onClick={handleSubmit}>
                 <PrimaryBtn disabled={!isValid()} onClick={() => setPasso(passo + 1)}>Concluir</PrimaryBtn> 
@@ -295,7 +297,6 @@ const PassoFrame = ({children, title} : {children: ReactNode, title?: string}) =
 
   return (
     <Box data-aos="fade-in" data-aos-duration="500" data-aos-delay="150" sx={{
-      minHeight: {sm:'400px', xs:'300'},
     }}> 
     
       <Typography sx={{
