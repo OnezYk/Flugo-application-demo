@@ -10,12 +10,13 @@ type BtnProps = {
   children: string,
   to?: string,
   onClick?: () => void,
-  disabled?: boolean
+  disabled?: boolean,
+  fullWidth?: boolean
 
 };
 
 // Botão principal
-const PrimaryBtn = ({children, to, onClick, disabled}: BtnProps) => {
+const PrimaryBtn = ({children, to, onClick, disabled, fullWidth}: BtnProps) => {
 
   const navigate = useNavigate();
 
@@ -24,6 +25,7 @@ const PrimaryBtn = ({children, to, onClick, disabled}: BtnProps) => {
       variant="contained"
       color="primary"
       disabled={disabled}
+      fullWidth={fullWidth}
 
       // to: string de rota de destino, ou, na ausência, outra funcção
       onClick={to ? () => navigate(to) : onClick }
