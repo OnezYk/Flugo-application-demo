@@ -9,6 +9,7 @@ import Login from './pages/cadastro/Login';
 import Registro from './pages/cadastro/Registro';
 import { useAuth } from './hooks/useAuth';
 import NotFound from './pages/NotFound';
+import Departamentos from './pages/Departamentos';
 
 const App = () => {
 
@@ -28,7 +29,10 @@ const App = () => {
       <Route element={<Layout/>}>
         <Route path="/colaboradores" element={<Colaboradores />} />
         <Route path="/formulario" element={<Formulario />} />
+        <Route path="/departamentos" element={<Departamentos />} />
       </Route>
+
+
         <Route path="/404" element={<NotFound />} />
     </Routes>
   )

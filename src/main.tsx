@@ -12,7 +12,7 @@ import App from './App.tsx';
 import { AuthProvider } from './contexts/AuthProvider.tsx';
 
 // Definição da paleta de cores
-const theme = createTheme({
+export const theme = createTheme({
   palette: {
     primary: { 
       main: '#22c55e',

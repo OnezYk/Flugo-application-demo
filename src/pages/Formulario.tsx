@@ -22,7 +22,12 @@ export type FormData ={
   nome: string,
   email: string,
   departamento: string,
+  cargo: string,
+  senioridade: string,
+  salarioBase: number,
+  dataDeAdmissao: Date,
   status: boolean
+
 }
 
 // Criação de tipo flexível, reduzindo código verboso
@@ -53,6 +58,10 @@ const Formulario = () => {
     nome: '',
     email: '',
     departamento: '',
+    cargo: '',
+    senioridade: '',
+    salarioBase: 0,
+    dataDeAdmissao: new Date(),
     status: false
   });
 
@@ -62,7 +71,7 @@ const Formulario = () => {
   
   const isValid = () => {
     if (passo === 1) return isValidNome(form.nome) && isValidEmail(form.email);
-    if (passo === 2) return form.departamento !== '';
+    if (passo === 2) return form.departamento !== '' && form.salarioBase !== 0;
     return true
   };
 
@@ -241,7 +250,7 @@ const PassoUm = ({form, setForm, erroEmail, erroNome} : PassoUmProps) => {
           errorCall='Insira um e-mail válido!'
           // Mesma lógica em input de nome..
           onChange={(e) => {
-            const emailInput = e.target.value.toLocaleLowerCase();
+            const emailInput = e.target.value;
             setForm!(prev => ({ ...prev, email: emailInput }));
           }}/>
 
@@ -267,11 +276,46 @@ const PassoUm = ({form, setForm, erroEmail, erroNome} : PassoUmProps) => {
 
 const PassoDois = ({setForm, form} : PassoProps) => {
 
+  const [salarioError, setSalarioError] = useState (false)
+  const [erroSalarioReason, setErroSalarioReason] = useState ('')
+
+  const formatBRL = (value: number) =>
+  new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value)
+
   return (
 
     <PassoFrame title='Infos Profissionais'>
       {/* Foi necessário PropLifting para não ter conflito de eventos no componente */}
-      <InputSelect value={form!.departamento} onChange={(e) => setForm!(prev => ({ ...prev, departamento: e.target.value }))}/>
+      <Box sx={{display: 'flex', flexDirection: 'column', gap: 3}}>
+        <InputSelect title='Departamento' items={['TI', 'Design', 'Software', 'etc']} value={form!.departamento} onChange={(e) => setForm!(prev => ({ ...prev, departamento: e.target.value }))}/>
+
+        <InputField
+          info="Cargo"
+          value={form!.cargo}
+          error={salarioError}
+          errorCall={erroSalarioReason}
+          onChange={(e) => {
+            const cargoInput = e.target.value
+            setForm!(prev => ({ ...prev, cargo: cargoInput}));
+          }}
+        />
+
+        <InputSelect title='Senioridade' items={['Estagiário', 'Júnior', 'Pleno', 'Sênior']} value={form!.senioridade} onChange={(e) => setForm!(prev => ({ ...prev, senioridade: e.target.value }))}/>
+
+        <InputField
+          info="Salário"
+          value={formatBRL(form!.salarioBase)}
+          error={salarioError}
+          errorCall={erroSalarioReason}
+          onChange={(e) => {
+            const salarioInput = Number(e.target.value.replace(/\D/g, "").slice(0, 9)) / 100;
+            if (salarioInput > 40000) { setSalarioError(true); setErroSalarioReason('Salário alto detectado, deseja prosseguir?') }
+            else { setSalarioError(false) }
+            setForm!(prev => ({ ...prev, salarioBase: salarioInput }));
+          }}
+        />
+
+      </Box>
     </PassoFrame>
   )
 
@@ -341,7 +385,7 @@ const InputField = ({info, value, onChange, error, errorCall} : {
 }
 
 // Input de infos (select)
-const InputSelect = ({onChange, value} : {onChange: (e: SelectChangeEvent) => void, value: string}) => {
+const InputSelect = ({onChange, value, title, items} : {onChange: (e: SelectChangeEvent) => void, value: string, title: string, items: string[]}) => {
 
   // Disparando o evento ao parent
   const handleChange = (event: SelectChangeEvent) => {
@@ -351,7 +395,7 @@ const InputSelect = ({onChange, value} : {onChange: (e: SelectChangeEvent) => vo
   return (
     <Box sx={{ minWidth: 120 }}>
       <FormControl fullWidth>
-        <InputLabel id="select-label">Departamento</InputLabel>
+        <InputLabel id="select-label">{title}</InputLabel>
         <Select
           labelId="select-label"
           id="select"
@@ -359,10 +403,9 @@ const InputSelect = ({onChange, value} : {onChange: (e: SelectChangeEvent) => vo
           label="Departamento"
           onChange={handleChange}
         >
-          <MenuItem value={"Design"}>Design</MenuItem>
-          <MenuItem value={"TI"}>TI</MenuItem>
-          <MenuItem value={"Marketing"}>Marketing</MenuItem>
-          <MenuItem value={"Produto"}>Produto</MenuItem>
+
+          {items.map((item) => <MenuItem value={item}>{item}</MenuItem>)}
+
         </Select>
       </FormControl>
     </Box>

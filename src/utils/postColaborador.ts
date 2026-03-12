@@ -11,8 +11,11 @@ import type { FormData } from '../pages/Formulario'
 export const postColaborador = async (form: FormData) => {
   return await addDoc(collection(db, 'colaboradores'), {
     nome: form.nome,
-    email: form.email,
+    email: form.email.toLowerCase(),
     departamento: form.departamento,
+    cargo: form.cargo,
+    senioridade: form.senioridade,
+    salarioBase: form.salarioBase,
     status: form.status,
   })
   .then(() => console.log('success'))
