@@ -21,18 +21,30 @@ import type { FormData } from "./Formulario";
 // O fetch contém id além dos dados enviados, por isso extenção do tipo
 type ColaboradorProp = FormData & { id: string };
 
+// JWT
+import { useAuth } from "../hooks/useAuth";
+
 // Routes
 import {getColaboradores} from '../utils/getColaborador';
+import { Navigate } from 'react-router-dom'
+
 
 const Colaboradores = () => {
 
+  const { userLoggedIn  } = useAuth()
+  
   const isSmall = useMediaQuery('(max-width: 660px)'); // True quando media < 660px
   const isXSmall = useMediaQuery('(max-width: 500px)'); // True quando media < 660px
-
+  
   // Inicialização da biblioteca de animação
   useEffect(() => {
     AOS.init()
   }, [])
+  
+
+  if (!userLoggedIn) {
+    return <Navigate to="/login" />
+  }
 
   return (
     <Box

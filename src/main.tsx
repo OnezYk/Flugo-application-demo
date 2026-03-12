@@ -9,6 +9,7 @@ import { createTheme } from '@mui/material';
 
 // Componentes
 import App from './App.tsx';
+import { AuthProvider } from './contexts/AuthProvider.tsx';
 
 // Definição da paleta de cores
 const theme = createTheme({
@@ -39,10 +40,12 @@ const theme = createTheme({
 
 createRoot(document.getElementById('root')!).render(
   <ThemeProvider theme={theme}>
-    <BrowserRouter>
-      <StrictMode>
-        <App />
-      </StrictMode>,
-    </BrowserRouter>
+    <AuthProvider>
+      <BrowserRouter>
+        <StrictMode>
+          <App />
+        </StrictMode>,
+      </BrowserRouter>
+    </AuthProvider>
   </ThemeProvider>
 )

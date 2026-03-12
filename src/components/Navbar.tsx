@@ -94,7 +94,7 @@ const BigNav = ({open, setOpen} : {open:boolean, setOpen: () => void}) => {
       }}>
         <Box
           component="img"
-          onClick={() => {navigate('/'); setOpen()}}
+          onClick={() => {navigate('/colaboradores'); setOpen()}}
           sx={{
             width: '100px',
             transition: 'all 0.2s',
@@ -132,7 +132,7 @@ const Card = ({children, setOpen}: {children:string, setOpen: () => void}) => {
       overflow: 'hidden',
       ":hover": {cursor: 'pointer', paddingLeft: isSmall ? 3 : 4, bgcolor: (theme) => theme.palette.text.disabled}
     }}>
-      <Box onClick={() => {navigate('/'); setOpen()}} sx={{
+      <Box onClick={() => {navigate('/colaboradores'); setOpen()}} sx={{
         display: 'flex',
         alignItems: 'center',
         gap: 2

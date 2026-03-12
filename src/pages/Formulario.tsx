@@ -92,7 +92,7 @@ const Formulario = () => {
   // Handle do POST ao Firebase após "Concluido" 
   const handleSubmit = async () => {
     await postColaborador(form);
-    return navigate("/");
+    return navigate("/colaboradores");
   }
 
   // Inicialização da biblioteca de animação
