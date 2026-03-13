@@ -16,6 +16,7 @@ export const postColaborador = async (form: ColaboradorFormData) => {
     cargo: form.cargo,
     senioridade: form.senioridade,
     salarioBase: form.salarioBase,
+    dataDeAdmissao: form.dataDeAdmissao,
     status: form.status,
   })
   .then(() => console.log('success'))

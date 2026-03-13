@@ -1,6 +1,6 @@
 // React
 import { useNavigate } from "react-router-dom";
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
 
 // Logos
 import flugoLogo from '../assets/flugoLogo.png';
@@ -14,6 +14,7 @@ import MenuRoundedIcon from '@mui/icons-material/MenuRounded';
 
 // Outros
 import '../globals.css';
+import { FolderCopyRounded } from "@mui/icons-material";
 
 // Navbar
 const Navbar = () => {
@@ -106,13 +107,20 @@ const BigNav = ({open, setOpen} : {open:boolean, setOpen: () => void}) => {
         />
       </Box>
       
-      <Card setOpen={setOpen}>Colaboradores</Card>
+      <Box sx={{display:'flex', flexDirection: 'column', gap: 1}}>
+        <Card to='colaboradores' icon={
+          <AccountBoxIcon sx={{ fontSize: isSmall ? 50 : 30 }}/>
+        } setOpen={setOpen}>Colaboradores</Card>
+        <Card to='departamentos' icon={
+          <FolderCopyRounded sx={{ fontSize: isSmall ? 50 : 30 }}/>
+        } setOpen={setOpen}>Departamentos</Card>
+      </Box>
 
     </Box> 
   )
 }
 
-const Card = ({children, setOpen}: {children:string, setOpen: () => void}) => {
+const Card = ({children, setOpen, icon, to}: {children:string, setOpen: () => void, icon: ReactNode, to: string}) => {
 
   const navigate = useNavigate();
   const theme = useTheme();
@@ -120,7 +128,9 @@ const Card = ({children, setOpen}: {children:string, setOpen: () => void}) => {
   const isSmall = useMediaQuery(theme.breakpoints.down('lg')); // true quando media < 1200px
 
   return(
-    <Box sx={{     
+    <Box 
+    onClick={() => navigate(`/${to}`)}
+    sx={{     
       height: '40px',
       display: "flex",
       borderRadius: 2,
@@ -137,9 +147,7 @@ const Card = ({children, setOpen}: {children:string, setOpen: () => void}) => {
         alignItems: 'center',
         gap: 2
       }}>
-        <AccountBoxIcon sx={{
-          fontSize: isSmall ? 50 : 30
-        }}/>
+        {icon}
         {!isSmall && (
           <>
             <Typography sx={{ fontWeight: 600, fontSize: '16px' }}>

@@ -51,7 +51,8 @@ export const useForm = (form?: ColaboradorFormData) => {
   new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value)
 
     const isValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form?.email ?? '') && /^[a-zA-ZÀ-ÿ\s]+$/.test(form?.nome ?? '');
+    const isNomeValid = /^[a-zA-ZÀ-ÿ\s]+$/.test(form?.nome ?? '');
 
-  return {toBRL, onChangeFunc, isEmptyCheck, stringError, salarioError, erroSalarioReason, isValid}
+  return {toBRL, onChangeFunc, isEmptyCheck, stringError, salarioError, erroSalarioReason, isValid, isNomeValid}
 
 } 

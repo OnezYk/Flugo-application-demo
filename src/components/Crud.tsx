@@ -14,10 +14,11 @@ import CloseIcon from '@mui/icons-material/Close';
 import type { ColaboradorProp } from '../pages/Colaboradores';
 import InputField from './InputField';
 import { useForm } from '../hooks/useForm';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import type { ColaboradorFormData } from '../pages/Formulario';
 import InputSelect from './InputSelect';
 import { putColaborador } from '../utils/editColaborador';
+import { getDepartamentos } from '../utils/routesDepartamento';
 
 type CrudInfoProps = {
 
@@ -43,11 +44,19 @@ export const Crud = ({ open, handleClose, colaborador, isEdit, refresh}: CrudPro
 
   
   const [editColaborador, setEditColaborador] = useState<ColaboradorFormData | null>(colaborador ?? null)
+  const [departamentos, setDepartamentos] = useState<string[]>([])
 
   const handleReset = () => {
     setEditColaborador(colaborador);
     handleClose?.();
   }
+
+  useEffect(() => {
+
+    getDepartamentos().then(data => 
+      setDepartamentos(data.map(e => e.nome)))
+
+  }, [])
 
   if (!colaborador) {
     console.log("Colaborador não encontrado");
@@ -153,7 +162,7 @@ return (
 
           <InputSelect 
             title='Departamento' 
-            items={['TI', 'Design', 'Software', 'etc']} 
+            items={departamentos} 
             value={editColaborador?.departamento ?? colaborador.departamento} 
             onChange={(e) => setEditColaborador(prev => ({...prev!, departamento: e.target.value}))}
             isEdit={isEdit}

@@ -10,6 +10,7 @@ import Registro from './pages/cadastro/Registro';
 import { useAuth } from './hooks/useAuth';
 import NotFound from './pages/NotFound';
 import Departamentos from './pages/Departamentos';
+import NewDepartamento from './pages/NewDepartamento';
 
 const App = () => {
 
@@ -30,6 +31,7 @@ const App = () => {
         <Route path="/colaboradores" element={<Colaboradores />} />
         <Route path="/formulario" element={<Formulario />} />
         <Route path="/departamentos" element={<Departamentos />} />
+        <Route path="/newdepartamento" element={<NewDepartamento />} />
       </Route>
 
 
