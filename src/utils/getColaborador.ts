@@ -5,7 +5,7 @@ import { collection, getDocs, query, orderBy } from 'firebase/firestore';
 import { db }  from './db';
 
 // Componentes
-import type { FormData } from '../pages/Formulario';
+import type { ColaboradorFormData } from '../pages/Formulario';
 
 //Função poli-rota
 export const getColaboradores = async (field: string = 'nome', order: 'asc' | 'desc' = 'asc') => {
@@ -13,7 +13,7 @@ export const getColaboradores = async (field: string = 'nome', order: 'asc' | 'd
   const snapshot = await getDocs(q)
   return snapshot.docs.map(doc => ({
     id: doc.id,
-    ...doc.data() as FormData
+    ...doc.data() as ColaboradorFormData
   }))
 };
 

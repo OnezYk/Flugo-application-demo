@@ -5,10 +5,10 @@ import { collection, addDoc } from 'firebase/firestore'
 import { db }  from './db'
 
 // Type
-import type { FormData } from '../pages/Formulario'
+import type { ColaboradorFormData } from '../pages/Formulario'
 
 // Post colaborador -> Firestore
-export const postColaborador = async (form: FormData) => {
+export const postColaborador = async (form: ColaboradorFormData) => {
   return await addDoc(collection(db, 'colaboradores'), {
     nome: form.nome,
     email: form.email.toLowerCase(),

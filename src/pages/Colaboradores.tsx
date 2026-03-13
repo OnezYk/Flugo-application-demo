@@ -21,10 +21,10 @@ import { notionists } from '@dicebear/collection';
 import PrimaryBtn from "../components/PrimaryBtn";
 
 // Types
-import type { FormData } from "./Formulario";
+import type { ColaboradorFormData } from "./Formulario";
 
 // O fetch contém id além dos dados enviados, por isso extenção do tipo
-export type ColaboradorProp = FormData & { id: string };
+export type ColaboradorProp = ColaboradorFormData & { id: string };
 
 // JWT
 import { useAuth } from "../hooks/useAuth";
@@ -171,7 +171,14 @@ const ColaboradoresTable = () => {
    {colaboradores.length >= 1 ?  // Caso tenha colaboradores na Firestore ->
 
   <>
-  <Crud isEdit={isEdit} colaborador={selectedColaborador} open={openCrud} handleClose={() => setOpenCrud(false) }/>
+  <Crud 
+    refresh={() => getColaboradores().then(data => setColaboradores(data))}
+    key={selectedColaborador?.id} // força remontagem ao trocar colaborador
+    isEdit={isEdit} 
+    colaborador={selectedColaborador} 
+    open={openCrud} 
+    handleClose={() => setOpenCrud(false)}
+  />
    <TableContainer data-aos="fade-in" data-aos-duration="800"
       sx={{
         boxShadow: 3,

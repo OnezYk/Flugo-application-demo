@@ -2,7 +2,6 @@ import {
   Dialog, 
   DialogContent, 
   DialogActions, 
-  TextField, 
   Button, 
   Box,
   IconButton,
@@ -13,6 +12,12 @@ import {
 } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 import type { ColaboradorProp } from '../pages/Colaboradores';
+import InputField from './InputField';
+import { useForm } from '../hooks/useForm';
+import { useState } from 'react';
+import type { ColaboradorFormData } from '../pages/Formulario';
+import InputSelect from './InputSelect';
+import { putColaborador } from '../utils/editColaborador';
 
 type CrudInfoProps = {
 
@@ -27,22 +32,42 @@ type CrudProps = CrudInfoProps & {
   open: boolean,
   colaborador: ColaboradorProp | null,
   handleClose?: () => void,
+  refresh: () => void
 
 
 }
 
-export const Crud = ({ open, handleClose, colaborador, isEdit}: CrudProps) => {
+export const Crud = ({ open, handleClose, colaborador, isEdit, refresh}: CrudProps) => {
   // Determine if we are editing or creating
+  const {toBRL, onChangeFunc, stringError, salarioError, erroSalarioReason} = useForm()
+
   
+  const [editColaborador, setEditColaborador] = useState<ColaboradorFormData | null>(colaborador ?? null)
+
+  const handleReset = () => {
+    setEditColaborador(colaborador);
+    handleClose?.();
+  }
+
   if (!colaborador) {
     console.log("Colaborador não encontrado");
     return null
   }
 
+  const displayData = editColaborador ?? colaborador;
+
+  const handleSubmit = () => {
+
+    putColaborador(colaborador.id, editColaborador!);
+    refresh();
+    handleClose?.();
+
+  }
+
 return (
     <Dialog 
       open={open} 
-      onClose={handleClose}
+      onClose={handleReset}
       maxWidth="sm" 
       fullWidth
       slotProps={{
@@ -76,7 +101,7 @@ return (
               }}
             />
         </Box>
-        <IconButton onClick={handleClose}>
+        <IconButton onClick={handleReset}>
           <CloseIcon />
         </IconButton>
       </DialogTitle>
@@ -86,8 +111,26 @@ return (
         <Box component="form" sx={{ display: 'grid', gridTemplateRows: '1fr 1fr', gap: 3, mt: 1}}>
 
           {/* Infos */}
-          <Card title='Nome' colaboradorInfo={colaborador.nome} isEdit={isEdit}/>
-          <Card title='E-mail' colaboradorInfo={colaborador.email} isEdit={isEdit}/>
+          <InputField
+            info="Nome"
+            value={isEdit ? displayData.nome : colaborador.nome}
+            error={stringError['nome'] || displayData.nome.trim() === ''}
+            errorCall={!stringError ? 'Insira um nome' : 'caractere inválido'}
+            isEdit={isEdit}
+            // Ao digitar, insere valor em val e testa de imediato para prever erro
+            onChange={(e) => {
+
+              onChangeFunc(e, (val) => setEditColaborador!(prev => ({...prev!, nome: String(val)})), 'string', 'nome')}}
+          />
+
+          <InputField
+            info="E-mail"
+            value={isEdit ? displayData.email : colaborador.email}
+            error={stringError['email'] || displayData.email.trim() === ''}
+            errorCall='Insira um e-mail válido!'
+            isEdit={isEdit}
+            onChange={(e) => onChangeFunc(e, (val) => setEditColaborador!(prev => ({...prev!, email: String(val)})), 'email', 'email')}
+          />
 
         </Box>
 
@@ -95,13 +138,47 @@ return (
 
         <Box component="form" sx={{ display: 'grid', gridTemplateRows: '1fr 1fr', gridTemplateColumns: '1fr 1fr', gap: 3, mt: 1 }}>
 
+              {/* open, handleClose, colaborador, isEdit */}
+              {/* FINALIZAR ISSO PQP custom hook para lógica de errors em inputs */}
           {/* Infos */}
-          <Card title='Departamento' colaboradorInfo={colaborador.departamento} isEdit={isEdit}/>
-          <Card title='Cargo' colaboradorInfo={colaborador.cargo} isEdit={isEdit}/>
-          <Card title='Salário' colaboradorInfo={colaborador.salarioBase} isEdit={isEdit}/>
-          <Card title='Senioridade' colaboradorInfo={colaborador.senioridade} isEdit={isEdit}/>
+          <InputField
+            info="Cargo"
+            value={isEdit ? displayData.cargo : colaborador.cargo}
+            error={stringError['cargo'] || displayData.cargo.trim() === ''}
+            errorCall={'Caractere inválido!'}
+            isEdit={isEdit}
+            // Ao digitar, insere valor em val e testa de imediato para prever erro
+            onChange={(e) => onChangeFunc(e, (val) => setEditColaborador!(prev => ({...prev!, cargo: String(val)})), 'string', 'cargo')}
+          />
+
+          <InputSelect 
+            title='Departamento' 
+            items={['TI', 'Design', 'Software', 'etc']} 
+            value={editColaborador?.departamento ?? colaborador.departamento} 
+            onChange={(e) => setEditColaborador(prev => ({...prev!, departamento: e.target.value}))}
+            isEdit={isEdit}
+          />
+
+          <InputField
+            info="Salário"
+            value={toBRL(Number(displayData.salarioBase))}
+            error={salarioError || displayData.salarioBase === 0}
+            errorCall={erroSalarioReason}
+            isEdit={isEdit}
+            onChange={(e) => onChangeFunc(e, (salarioInput) => setEditColaborador!(prev => ({ ...prev!, salarioBase: Number(salarioInput)})),'number', 'number')}
+          />
+
+          <InputSelect 
+            title='Senioridade' 
+            items={['Estagiário','Júnior', 'Pleno', 'Sênior']} 
+            value={editColaborador?.senioridade ?? colaborador.senioridade} 
+            onChange={(e) => setEditColaborador(prev => ({...prev!, senioridade: e.target.value}))}
+            isEdit={isEdit}
+          />
 
         </Box>
+
+                
 
 
 
@@ -110,7 +187,7 @@ return (
       {isEdit &&
       <DialogActions sx={{ p: 3, justifyContent: 'space-between'}}>
           <Button 
-            onClick={handleClose}
+            onClick={handleReset}
             variant="contained" 
             sx={{ borderRadius: '10px', px: 4, fontWeight: 'bold', color: 'text.primary', bgcolor: 'text.disabled', ':hover': {bgcolor: '#cfcfcf'}}}
           >
@@ -119,6 +196,14 @@ return (
           <Button 
             variant="contained" 
             color="primary" 
+            onClick={handleSubmit}
+            disabled={
+              !displayData.nome.trim() ||
+              !displayData.email.trim() ||
+              !displayData.cargo.trim() ||
+              !displayData.salarioBase ||
+              stringError['email']
+            }
             sx={{ borderRadius: '10px', px: 4, fontWeight: 'bold' }}
           >
             Salvar Alterações
@@ -130,24 +215,3 @@ return (
 };
 
 export default Crud;
-
-const Card = ({title, colaboradorInfo, isEdit}: CrudInfoProps) => {
-
-  const formatBRL = (value: number) =>
-  new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value)
-
-  return (
-    <TextField 
-      label={title} 
-      variant="outlined" 
-      fullWidth 
-      defaultValue={typeof(colaboradorInfo) == 'string' ? colaboradorInfo : formatBRL(colaboradorInfo!)}
-      slotProps={{
-        input: {
-          readOnly: isEdit ? false : true
-        },
-    }}
-    />
-  )
-
-}
