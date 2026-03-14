@@ -1,5 +1,5 @@
 import { Box, Avatar, Button } from '@mui/material'
-import React, { useState } from 'react'
+import { useState } from 'react'
 
 // Avatares
 import { notionists } from '@dicebear/collection';
