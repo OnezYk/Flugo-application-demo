@@ -4,7 +4,11 @@ import { useEffect, useState } from "react";
 
 // MUI copmonents
 import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow,
-Avatar, Chip, Box, Typography, useMediaQuery, Fade} from "@mui/material";
+Avatar, Chip, Box, Typography, useMediaQuery, Fade,
+Select,
+MenuItem,
+FormControl,
+type SelectChangeEvent} from "@mui/material";
 import SouthRoundedIcon from "@mui/icons-material/SouthRounded";
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import EditIcon from '@mui/icons-material/Edit';
@@ -35,8 +39,14 @@ import { Navigate } from 'react-router-dom'
 import { deleteColaborador } from "../utils/deleteColaborador";
 
 import Crud from "../components/Crud";
+import InputField from "../components/InputField";
+import { fuzzySearch } from "../utils/filterTabela";
 
 const Colaboradores = () => {
+
+  const [query, setQuery] = useState('')
+  const [filter, setFilter] = useState('')
+  
 
   const { userLoggedIn  } = useAuth()
   
@@ -46,7 +56,7 @@ const Colaboradores = () => {
   // Inicialização da biblioteca de animação
   useEffect(() => {
     AOS.init()
-  }, [])
+  },[query])
   
 
   if (!userLoggedIn) {
@@ -70,6 +80,7 @@ const Colaboradores = () => {
           display: "flex",
           justifyContent: "space-between",
           alignItems: "center",
+          mb: 2
         }}
       >
         <Typography
@@ -89,15 +100,23 @@ const Colaboradores = () => {
         </Box>
 
       </Box>
+      
+      <Box sx={{ display: 'flex', gap:2, height: 50, alignItems: 'center'}}>
 
-      <ColaboradoresTable />
+        <FilterBtn filter={filter} handleFilter={(value) => setFilter(value)} />
+
+        <InputField placeholder="Pesquise um colaborador" value={query} onChange={(e) => setQuery(e.target.value)}/>
+
+      </Box>
+        <ColaboradoresTable query={query} filter={filter} />
     </Box>
   );
 };
 
 // Tabela de colaboradores
-const ColaboradoresTable = () => {
+const ColaboradoresTable = ({query, filter}:{query: string, filter:string}) => {
 
+  
   const [colaboradores, setColaboradores] = useState<ColaboradorProp[]>([])
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc')
   
@@ -106,7 +125,8 @@ const ColaboradoresTable = () => {
   const [selectedColaborador, setSelectedColaborador] = useState<ColaboradorProp | null>(null)
   const [isEdit, setIsEdit] = useState(false)
   const [selected, setSelected] = useState<string[]>([])
-
+  
+  const results = fuzzySearch(colaboradores, filter, query);
   // Fetch na montagem do componente
   useEffect(() => {
 
@@ -227,13 +247,13 @@ const ColaboradoresTable = () => {
         <TableBody>
 
           {/* Loop de todos os colaboradores da firestore */}
-          {colaboradores.map((row:ColaboradorProp, index) => (
+          {results.map((row:ColaboradorProp, index) => (
             // Animação em cascata de acordo com qtd de elementos
             <Fade in={true} timeout={300 + index * 200} key={row.id}>
 
               {/* Seu sx determina o último elemento renderizado do array e estiliza */}
               <TableRow key={row.id} sx={{"&:last-child td": {border: 0}}}>
-                <TableCell sx={{maxWidth: 0}}><Checkbox onClick={() => handleBulkSelect(row.id)} size="large"/></TableCell>
+                <TableCell sx={{width: 40, p: 0}}><Checkbox onClick={() => handleBulkSelect(row.id)} size="large"/></TableCell>
                 <TableCell>
                   <Box sx={{display: "flex", alignItems: "center", gap: 1.5}}>
 
@@ -289,6 +309,24 @@ const ColaboradoresTable = () => {
       textAlign: {sm: 'start', xs: 'center'},
     }}>Sem colaboradores por enquanto, experimente cadastrar um!</Typography>}
     </>
+  );
+};
+
+const FilterBtn = ({ handleFilter, filter }: {handleFilter: (value: string) => void, filter:string}) => {
+  return (
+    <FormControl sx={{ minWidth: 185 }}>
+      <Select
+        labelId="filter-label"
+        value={filter}
+        displayEmpty
+        onChange={(e: SelectChangeEvent) => handleFilter(e.target.value)}
+      >
+        <MenuItem value="" disabled>Pesquisar por</MenuItem>
+        <MenuItem value="nome">Nome</MenuItem>
+        <MenuItem value="email">Email</MenuItem>
+        <MenuItem value="departamento">Departamento</MenuItem>
+      </Select>
+    </FormControl>
   );
 };
 

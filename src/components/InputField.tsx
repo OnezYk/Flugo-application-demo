@@ -1,16 +1,18 @@
 import { TextField } from "@mui/material"
 
-const InputField = ({info, value, onChange, error, errorCall, isEdit = true} : {
-  info: string, 
+const InputField = ({info, value, onChange, error, errorCall, isEdit = true, placeholder} : {
+  info?: string, 
   value: string, 
   onChange: (e: React.ChangeEvent<HTMLInputElement>) => void,
-  error: boolean,
-  errorCall: string,
-  isEdit?: boolean
+  error?: boolean,
+  errorCall?: string,
+  isEdit?: boolean,
+  placeholder?: string
 }) => {
   return (
     <TextField
       label={info}
+      placeholder={placeholder}
       variant="outlined"
       fullWidth
       error={error}

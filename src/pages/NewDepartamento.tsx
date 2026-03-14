@@ -56,6 +56,8 @@ type StepProps = {
 // Formulário
 const Formulario = () => {
 
+  const isSmallY = useMediaQuery('(max-height: 800px)'); // True quando media < 660px
+
   const [passo, setPasso] = useState(1);
   const [fireErrorBtn, setFireErrorBtn] = useState(false);
  
@@ -96,10 +98,18 @@ const Formulario = () => {
 
   // Handle do POST ao Firebase após "Concluido" 
   const handleSubmit = async () => {
-    const finalForm = { ...form, departamento: departamento.nome };
-    await postColaborador(finalForm);
-    await postDepartamento(departamento);
-    return navigate("/colaboradores");
+    const finalForm = { ...form, departamento: departamento.nome, senioridade: 'Gestor' }
+    
+   try {
+      await postDepartamento(departamento)
+    } catch (error) {
+      alert(error instanceof Error ? error.message : 'Erro ao criar departamento')
+      navigate("/departamentos")
+      return
+    }
+
+    await postColaborador(finalForm)
+    navigate("/departamentos")
   }
 
   // Inicialização da biblioteca de animação
@@ -123,6 +133,10 @@ const Formulario = () => {
         display: 'flex',
         flexDirection: 'column',
         color: 'text.primary',
+        overflowX: 'hidden',  
+        overflowY: isSmallY ? 'auto' : 'hidden',  
+        maxHeight: isSmallY ? '80dvh' : '100dvh',  
+        pb: 4               
       }}>
         <Typography data-aos="fade-right" data-aos-duration='500' sx={{
           fontWeight: 600,

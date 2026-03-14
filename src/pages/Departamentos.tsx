@@ -4,7 +4,14 @@ import { useEffect, useState } from "react";
 
 // MUI copmonents
 import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow,
-Avatar, Chip, Box, Typography, useMediaQuery, Fade} from "@mui/material";
+Avatar, Chip, Box, Typography, useMediaQuery, Fade,
+Select,
+MenuItem,
+FormControl,
+type SelectChangeEvent,
+Tabs,
+Tab,
+Button} from "@mui/material";
 import SouthRoundedIcon from "@mui/icons-material/SouthRounded";
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import EditIcon from '@mui/icons-material/Edit';
@@ -35,8 +42,20 @@ import { Navigate } from 'react-router-dom'
 import { deleteColaborador } from "../utils/deleteColaborador";
 
 import Crud from "../components/Crud";
+import InputField from "../components/InputField";
+import { fuzzySearch } from "../utils/filterTabela";
+import CreateCrud from "../components/CreateCrud";
+import { getDepartamentos, type DepartamentoType } from "../utils/routesDepartamento";
+import DeleteTab from "../components/DeleteTab";
+import DeleteGestor from "../components/DeleteGestor";
 
-const Departamentos = () => {
+const Colaboradores = () => {
+
+  const [query, setQuery] = useState('')
+  const [filter, setFilter] = useState('')
+  const [activeTab, setActiveTab] = useState('')
+  const [departamentos, setDepartamentos] = useState<DepartamentoType[]>([])
+
 
   const { userLoggedIn  } = useAuth()
   
@@ -45,15 +64,22 @@ const Departamentos = () => {
   
   // Inicialização da biblioteca de animação
   useEffect(() => {
+    getColaboradores().then(data => {
+      setActiveTab(data[0]?.departamento ?? '')
+    getDepartamentos().then(data => {
+      setDepartamentos(data)
+    })
+    })
     AOS.init()
   }, [])
-  
+
 
   if (!userLoggedIn) {
     return <Navigate to="/login" />
   }
 
   return (
+    <>
     <Box
       sx={{
         position: 'relative',
@@ -70,6 +96,7 @@ const Departamentos = () => {
           display: "flex",
           justifyContent: "space-between",
           alignItems: "center",
+          mb: 2
         }}
       >
         <Typography
@@ -85,35 +112,70 @@ const Departamentos = () => {
         </Typography>
 
         <Box data-aos="fade-right" data-aos-duration="800" data-aos-delay="250">
-          <PrimaryBtn to="/newdepartamento">Criar um departamento</PrimaryBtn>
+          <PrimaryBtn to="/newdepartamento"> Novo Departamento </PrimaryBtn>
         </Box>
 
       </Box>
+      
+      <Box sx={{ display: 'flex', gap:2, height: 50, alignItems: 'center'}}>
 
-      <ColaboradoresTable />
+        <FilterBtn filter={filter} handleFilter={(value) => setFilter(value)} />
+
+        <InputField placeholder="Pesquise um colaborador do departamento" value={query} onChange={(e) => setQuery(e.target.value)}/>
+
+      </Box>
+      {departamentos.length >= 1 
+        ? <DepartamentosTab query={query} filter={filter} activeTab={activeTab} setActiveTab={setActiveTab} />
+        : <Typography data-aos="fade-right" data-aos-delay="150" data-aos-duration="800" variant="h2" sx={{
+          mt: {sm:2, xs:7},
+          fontSize: 20,
+          fontWeight: 600,
+          color: 'text.secondary',
+          textAlign: {sm: 'start', xs: 'center'}}}> Sem departamentos por enquanto, experimente criar um!</Typography>
+      }
     </Box>
+    </>
   );
 };
 
-// Tabela de colaboradores
-const ColaboradoresTable = () => {
+// Tabela de colabDoradores
+const DepartamentosTable = ({ query, filter, activeTab }: {
+  query: string; filter: string; activeTab: string
+}) => {
 
   const [colaboradores, setColaboradores] = useState<ColaboradorProp[]>([])
+  const [departamentos, setDepartamentos] = useState<string[]>([])
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc')
   
   // CRUD
   const [openCrud, setOpenCrud] = useState(false)
+  const [openDeleteGestor, setOpenDeleteGestor] = useState(false)
+  const [gestorId, setGestorId] = useState('false')
+  const [openCreateCrud, setOpenCreateCrud] = useState(false)
   const [selectedColaborador, setSelectedColaborador] = useState<ColaboradorProp | null>(null)
   const [isEdit, setIsEdit] = useState(false)
   const [selected, setSelected] = useState<string[]>([])
-
+  
   // Fetch na montagem do componente
+
   useEffect(() => {
+    getColaboradores().then(data => {
+      setColaboradores(data)
+    })
+    getDepartamentos().then(data => {
+      setDepartamentos(data.map(d => d.nome))
+    })
+  }, [])
 
-    getColaboradores().then(data => setColaboradores(data));
-    
-  },[])
+    const results = () => {
+      return fuzzySearch(colaboradores, filter, query)
+      .filter(c => activeTab === '' || c.departamento === activeTab)
+    }
 
+    const gestores = results().filter(c => c.senioridade === 'Gestor')
+    const regular = results().filter(c => c.senioridade !== 'Gestor')
+
+  
   // Criação procedural de avatar
   const getAvatar = (seed: string) => {
     return createAvatar(notionists, { 
@@ -143,8 +205,13 @@ const ColaboradoresTable = () => {
 
   }
 
-  const handleDeleteColaborador = (id : string) => {
+  const handleDeleteColaborador = (id : string, senioridade : string) => {
 
+    if(senioridade == 'Gestor') {
+      setOpenDeleteGestor(true)
+      setGestorId(id);
+      return
+    }
     deleteColaborador(id);
     getColaboradores().then(data => setColaboradores(data));
     
@@ -166,11 +233,22 @@ const ColaboradoresTable = () => {
     
   }
 
+  const handleAddCrud = () => {
+
+    setOpenCreateCrud(true)
+
+  }
+
+  
+
   return (
    <>
-   {colaboradores.length >= 1 ?  // Caso tenha colaboradores na Firestore ->
+   {departamentos.length >= 1 ?  // Caso tenha colaboradores na Firestore ->
 
   <>
+
+  <DeleteGestor selectedId={gestorId} refresh={() => getColaboradores().then(data => setColaboradores(data))} open={openDeleteGestor} handleClose={() => setOpenDeleteGestor(false)}/>
+
   <Crud 
     refresh={() => getColaboradores().then(data => setColaboradores(data))}
     key={selectedColaborador?.id} // força remontagem ao trocar colaborador
@@ -179,6 +257,16 @@ const ColaboradoresTable = () => {
     open={openCrud} 
     handleClose={() => setOpenCrud(false)}
   />
+
+  <CreateCrud
+    refresh={() => getColaboradores().then(data => setColaboradores(data))}
+    key={selectedColaborador?.id} // força remontagem ao trocar colaborador
+    selectedDepartamento={String(activeTab)}
+    colaborador={selectedColaborador} 
+    open={openCreateCrud} 
+    handleClose={() => setOpenCreateCrud(false)}
+  />
+
    <TableContainer data-aos="fade-in" data-aos-duration="800"
       sx={{
         boxShadow: 3,
@@ -195,7 +283,7 @@ const ColaboradoresTable = () => {
 
           {/* Loop entre os elementos do array */}
           <TableRow sx={{bgcolor: "text.disabled"}}>
-            {["","Nome", "Email", "Departamento", "Ações", "Status"].map((col, i) => (
+            {["","Nome", "Email", "Cargo", "Ações", "Status"].map((col, i) => (
 
               <TableCell
                 onClick={() => {if (col !== "Ações") {handleGetColaborador(col)}}} // Faz o fetch filtrado de acordo com o elemento do array clicado
@@ -227,13 +315,14 @@ const ColaboradoresTable = () => {
         <TableBody>
 
           {/* Loop de todos os colaboradores da firestore */}
-          {colaboradores.map((row:ColaboradorProp, index) => (
-            // Animação em cascata de acordo com qtd de elementos
-            <Fade in={true} timeout={300 + index * 200} key={row.id}>
+          {gestores.length > 0 && (
+            <>
+              <TableRow>
 
-              {/* Seu sx determina o último elemento renderizado do array e estiliza */}
-              <TableRow key={row.id} sx={{"&:last-child td": {border: 0}}}>
-                <TableCell sx={{maxWidth: 0}}><Checkbox onClick={() => handleBulkSelect(row.id)} size="large"/></TableCell>
+              </TableRow>
+              {gestores.map((row) => (
+                <TableRow key={row.id} sx={{"&:last-child td": {border: 0}}}>
+                <TableCell sx={{width:40, fontWeight:600}}>Gestor:</TableCell>
                 <TableCell>
                   <Box sx={{display: "flex", alignItems: "center", gap: 1.5}}>
 
@@ -243,7 +332,7 @@ const ColaboradoresTable = () => {
                   </Box>
                 </TableCell>
                 <TableCell>{row.email}</TableCell>
-                <TableCell>{row.departamento}</TableCell>
+                <TableCell>{row.cargo}</TableCell>
 
                 {/* Icons CRUD */}
                 <TableCell sx={{textAlign: "right", width: 120}}>
@@ -251,7 +340,61 @@ const ColaboradoresTable = () => {
                   <Box sx={{display: 'flex', justifyContent: 'end', gap: 2}}>
                     <VisibilityIcon onClick={() => handleOpenCrud(row, false)} sx={{color: '#06A9F4', transition: 'all 0.2s', ':hover': {color: '#0437c2', cursor: 'pointer', transform: 'scale(1.15)'}}}/>
                     <EditIcon onClick={() => handleOpenCrud(row, true)}  sx={{transition: 'all 0.2s', ':hover': {cursor: 'pointer', transform: 'scale(1.15)'}}}/>
-                    <DeleteIcon onClick={() => handleDeleteColaborador(row.id)}  sx={{color: 'error.main', transition: 'all 0.2s', ':hover': {color: '#a70f0f', cursor: 'pointer', transform: 'scale(1.15)'}}}/>
+                    <DeleteIcon onClick={() => handleDeleteColaborador(row.id, row.senioridade)}  sx={{color: 'error.main', transition: 'all 0.2s', ':hover': {color: '#a70f0f', cursor: 'pointer', transform: 'scale(1.15)'}}}/>
+                  </Box>
+
+                </TableCell>
+                <TableCell sx={{textAlign: "right"}}>
+
+                  {/* Responsividade com o estado de status */}
+                  <Chip
+                    label={row.status ? "Ativo" : "Inativo"}
+                    size="small"
+                    sx={{
+                      borderRadius: 1.5,
+                      bgcolor:
+                        row.status ? 'success.light' : "error.light",
+                      color:
+                        row.status ? "success.main" : "error.main",
+                      fontWeight: 600,
+                      fontSize: 12,
+                    }}
+                  />
+                </TableCell>
+              </TableRow>
+              ))}
+            </>
+          )}
+              <TableRow>
+                <TableCell colSpan={6} sx={{ fontWeight: 600, bgcolor: 'white', color: 'text.primary', fontSize: 18}}>
+                   Colaboradores:
+                </TableCell>
+              </TableRow>
+          {regular.map((row:ColaboradorProp, index) => (
+            // Animação em cascata de acordo com qtd de elementos
+            <Fade in={true} timeout={300 + index * 200} key={row.id}>
+
+              {/* Seu sx determina o último elemento renderizado do array e estiliza */}
+              <TableRow key={row.id} sx={{"&:last-child td": {border: 0}}}>
+                <TableCell sx={{ width: 40, p: 0 }}><Checkbox onClick={() => handleBulkSelect(row.id)} size="large"/></TableCell>
+                <TableCell>
+                  <Box sx={{display: "flex", alignItems: "center", gap: 1.5}}>
+
+                    {/* Coleta o svg criado de getAvatar, codifica assegurando o uso da string SVG em src={...} */}
+                    <Avatar src={`data:image/svg+xml;utf8,${encodeURIComponent(getAvatar(row.nome))}`} sx={{width: 36, height: 36}} />
+                    <Typography fontWeight={500}>{row.nome}</Typography>
+                  </Box>
+                </TableCell>
+                <TableCell>{row.email}</TableCell>
+                <TableCell>{row.cargo}</TableCell>
+
+                {/* Icons CRUD */}
+                <TableCell sx={{textAlign: "right", width: 120}}>
+
+                  <Box sx={{display: 'flex', justifyContent: 'end', gap: 2}}>
+                    <VisibilityIcon onClick={() => handleOpenCrud(row, false)} sx={{color: '#06A9F4', transition: 'all 0.2s', ':hover': {color: '#0437c2', cursor: 'pointer', transform: 'scale(1.15)'}}}/>
+                    <EditIcon onClick={() => handleOpenCrud(row, true)}  sx={{transition: 'all 0.2s', ':hover': {cursor: 'pointer', transform: 'scale(1.15)'}}}/>
+                    <DeleteIcon onClick={() => handleDeleteColaborador(row.id, row.senioridade)}  sx={{color: 'error.main', transition: 'all 0.2s', ':hover': {color: '#a70f0f', cursor: 'pointer', transform: 'scale(1.15)'}}}/>
                   </Box>
 
                 </TableCell>
@@ -278,18 +421,98 @@ const ColaboradoresTable = () => {
         </TableBody>
       </Table>
     </TableContainer> 
-    <PrimaryBtn onClick={handleBulkDelete} disabled={selected.length < 1} >Deletar selecionados</PrimaryBtn>
+    <Box sx={{display: 'flex', justifyContent: 'space-between'}}>
+      <PrimaryBtn onClick={handleBulkDelete} disabled={selected.length < 1} >Deletar selecionados</PrimaryBtn>
+      <PrimaryBtn onClick={handleAddCrud} >Adicionar colaborador</PrimaryBtn>
+    </Box>
     </>
-    : // Caso não há colaboradores na Firestore ->
-    <Typography data-aos="fade-right" data-aos-delay="150" data-aos-duration="800" variant="h2" sx={{
-      mt: {sm:2, xs:7},
-      fontSize: 20,
-      fontWeight: 600,
-      color: 'text.secondary',
-      textAlign: {sm: 'start', xs: 'center'},
-    }}>Sem colaboradores por enquanto, experimente cadastrar um!</Typography>}
+    : // Caso não há departamentos na Firestore ->
+       <Box>a</Box> }
     </>
   );
 };
 
-export default Departamentos;
+const FilterBtn = ({ handleFilter, filter }: {handleFilter: (value: string) => void, filter:string}) => {
+  return (
+    <FormControl sx={{ minWidth: 185 }}>
+      <Select
+        labelId="filter-label"
+        value={filter}
+        displayEmpty
+        onChange={(e: SelectChangeEvent) => handleFilter(e.target.value)}
+      >
+        <MenuItem value="" disabled>Pesquisar por</MenuItem>
+        <MenuItem value="nome">Nome</MenuItem>
+        <MenuItem value="email">Email</MenuItem>
+      </Select>
+    </FormControl>
+  );
+};
+
+const DepartamentosTab = ({ query, filter, activeTab, setActiveTab }: {
+  query: string; filter: string; activeTab: string; setActiveTab: (v: string) => void
+}) => {
+  const [departamentos, setDepartamentos] = useState<string[]>([])
+  const [colaboradores, setColaboradores] = useState<ColaboradorProp[]>([])
+  const [openDeleteTab, setOpenDeleteTab] = useState(false)
+
+  useEffect(() => {
+    getDepartamentos().then(data => {
+      const deps = data.map(d => d.nome)
+      setDepartamentos(deps)
+      setActiveTab(deps[0] ?? '')
+    })
+    getColaboradores().then(data => setColaboradores(data))
+  }, [])
+
+  const hasColaboradores = colaboradores.some(c => c.departamento === activeTab)
+
+
+  return (
+    <>
+
+      <DeleteTab  // ← add this
+        open={openDeleteTab}
+        handleClose={() => setOpenDeleteTab(false)}
+        activeTab={activeTab}
+        refresh={() => getDepartamentos().then(data => {
+          const deps = data.map(d => d.nome)
+          setDepartamentos(deps)
+          setActiveTab(deps[0] ?? '')
+        })}
+      />
+
+    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
+      <Tabs
+        value={activeTab || departamentos[0] || ''}
+        onChange={(_, v) => setActiveTab(v)}
+        scrollButtons="auto"
+        variant="scrollable"
+        sx={{ mb: 1, mt: 3, flex: 1 }}
+      >
+          {departamentos.map((dep, i) => (
+            <Tab key={`${dep}-${i}`} label={dep} value={dep} />
+          ))}
+      </Tabs>
+      <Button onClick={() => setOpenDeleteTab(true)} sx={{
+        bgcolor: 'error.main',
+        fontWeight: 600,
+        color: 'white',
+        py: 1.6,
+        px: 2,
+        transition: 'all 0.2s',
+        ':hover': {transform: 'scale(1.02)'},
+        ':active': {transform: 'scale(0.95)'}
+      }}>Excluir departamento</Button>
+    </Box>
+
+      {hasColaboradores
+        ? <DepartamentosTable query={query} filter={filter} activeTab={activeTab} />
+        : <Typography sx={{ mt: 4, color: 'text.secondary', fontSize: 25, fontWeight: 600 }}>
+            Nenhum colaborador neste departamento.
+          </Typography>
+      }
+    </>
+  )
+}
+export default Colaboradores;

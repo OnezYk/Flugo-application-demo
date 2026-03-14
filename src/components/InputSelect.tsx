@@ -2,11 +2,11 @@ import { Box, FormControl, InputLabel, Select, MenuItem } from "@mui/material";
 import type { SelectChangeEvent } from "@mui/material";
 
 
-const InputSelect = ({onChange, value, title, items, isEdit = true} : {onChange: (e: SelectChangeEvent) => void, value: string, title: string, items: string[], isEdit?:boolean}) => {
+const InputSelect = ({onChange, value, title, items, isEdit = true} : {onChange?: (e: SelectChangeEvent) => void, value: string, title: string, items: string[], isEdit?:boolean}) => {
 
   // Disparando o evento ao parent
   const handleChange = (event: SelectChangeEvent) => {
-    onChange(event);
+    onChange!(event);
   };
 
   return (

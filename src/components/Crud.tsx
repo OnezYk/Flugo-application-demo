@@ -35,7 +35,6 @@ type CrudProps = CrudInfoProps & {
   handleClose?: () => void,
   refresh: () => void
 
-
 }
 
 export const Crud = ({ open, handleClose, colaborador, isEdit, refresh}: CrudProps) => {
@@ -59,7 +58,6 @@ export const Crud = ({ open, handleClose, colaborador, isEdit, refresh}: CrudPro
   }, [])
 
   if (!colaborador) {
-    console.log("Colaborador não encontrado");
     return null
   }
 
@@ -97,14 +95,15 @@ return (
             {isEdit ? 'Editar Registro' : `Colaborador: ${colaborador.nome}` }
           </Typography>
             <Chip
-              label={colaborador.status ? "Ativo" : "Inativo"}
+              label={editColaborador?.status ? "Ativo" : "Inativo"}
               size="medium"
+              onClick={isEdit ? () => setEditColaborador(prev => ({...prev!, status: !prev!.status})) : undefined}
               sx={{
                 borderRadius: 1.5,
                 bgcolor:
-                  colaborador.status ? 'success.light' : "error.light",
+                  editColaborador?.status ? 'success.light' : "error.light",
                 color:
-                  colaborador.status ? "success.main" : "error.main",
+                  editColaborador?.status ? "success.main" : "error.main",
                 fontWeight: 600,
                 fontSize: 12,
               }}
@@ -147,8 +146,6 @@ return (
 
         <Box component="form" sx={{ display: 'grid', gridTemplateRows: '1fr 1fr', gridTemplateColumns: '1fr 1fr', gap: 3, mt: 1 }}>
 
-              {/* open, handleClose, colaborador, isEdit */}
-              {/* FINALIZAR ISSO PQP custom hook para lógica de errors em inputs */}
           {/* Infos */}
           <InputField
             info="Cargo"
@@ -179,7 +176,11 @@ return (
 
           <InputSelect 
             title='Senioridade' 
-            items={['Estagiário','Júnior', 'Pleno', 'Sênior']} 
+            items={
+              (editColaborador?.senioridade ?? colaborador.senioridade) === 'Gestor'
+                ? ['Gestor']
+                : ['Estagiário', 'Júnior', 'Pleno', 'Sênior']
+            } 
             value={editColaborador?.senioridade ?? colaborador.senioridade} 
             onChange={(e) => setEditColaborador(prev => ({...prev!, senioridade: e.target.value}))}
             isEdit={isEdit}
