@@ -15,7 +15,7 @@ import Stack from '@mui/material/Stack';
 import MuiCard from '@mui/material/Card';
 import { styled } from '@mui/material/styles';
 import FlugoLogo from '../../assets/flugoLogo.png'
-import { GoogleIcon, FacebookIcon } from '../../assets/CustomIcons';
+import { GoogleIcon } from '../../assets/CustomIcons';
 import { loginUser, signWith } from '../../utils/checkUser';
 
 import { useNavigate } from 'react-router-dom'
@@ -222,15 +222,6 @@ export default function Login() {
               sx={{color:'black'}}
             >
               Entre com o google
-            </Button>
-            <Button
-              fullWidth
-              variant="outlined"
-              onClick={() => handlePopUpSign('facebook')}
-              startIcon={<FacebookIcon />}
-              sx={{color:'black'}}
-            >
-              Entre com o facebook
             </Button>
             <Typography sx={{ textAlign: 'center' }}>
               Não tem uma conta?{' '}
