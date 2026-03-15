@@ -56,6 +56,7 @@ const Formulario = () => {
   const [fireErrorBtn, setFireErrorBtn] = useState(false);
 
   const [departamentos, setDepartamentos] = useState<string[]>([])
+  const [exitAnimation, setExitAnimation] = useState(true);
  
   const navigate = useNavigate();
 
@@ -77,22 +78,21 @@ const Formulario = () => {
 
   // Caso clique com o botão ainda desabilitado
   const handleClick = () => {
-    console.log("b")
 
-    if(!isValid) {
       setFireErrorBtn(true);
       setTimeout(() => {
         setFireErrorBtn(false)
-      }, 3000)
-      console.log("a")
-    }
+      }, 1500)
 
   };
 
   // Handle do POST ao Firebase após "Concluido" 
   const handleSubmit = async () => {
     await postColaborador(form);
-    return navigate("/colaboradores");
+    setExitAnimation(false);
+    setTimeout(() => {
+      return navigate("/colaboradores");
+    }, 500)
   }
 
   // Inicialização da biblioteca de animação
@@ -104,7 +104,7 @@ const Formulario = () => {
   }, [])
 
   return (
-    <>
+    <Fade in={exitAnimation} timeout={500}>
       <Box sx={{
         m: 4,
         mr: 5,
@@ -207,10 +207,8 @@ const Formulario = () => {
                 </Box>
               </Fade>
               : // Se estiver em passo > 3 (display do botão "Concluir" ) 
-              <Box onClick={handleSubmit}>
-                <PrimaryBtn disabled={!isValid} onClick={() => setPasso(passo + 1)}>Concluir</PrimaryBtn> 
-             </Box>
-              }
+                <PrimaryBtn disabled={!isValid} onClick={handleSubmit}>Concluir</PrimaryBtn>
+                }
             {/* ------------------------- */}
 
             </Box>
@@ -218,7 +216,7 @@ const Formulario = () => {
         </Box>
         </Box>
       </Box>
-    </>
+    </Fade>
   )
 }
 
@@ -238,17 +236,18 @@ const PassoUm = ({form, setForm, fireErrorBtn} : PassoProps) => {
       <InputField
         info="Nome do colaborador"
         value={form!.nome}
-        error={stringError['nome']}
-        errorCall={stringError ? 'Insira um nome' : 'caractere inválido'}
+        error={stringError['nome'] || (form!.nome == '' && fireErrorBtn)}
+        errorCall={stringError['nome'] ? 'caractere inválido' : 'Insira um nome'}
         // Ao digitar, insere valor em val e testa de imediato para prever erro
         onChange={(e) => onChangeFunc(e, (val) => setForm!(prev => ({...prev, nome: String(val)})), 'string', 'nome')}
         />
 
         <InputField
+          type='email'
           info="E-mail"
           value={form!.email}
-          error={stringError['email'] && fireErrorBtn}
-          errorCall='Insira um e-mail válido!'
+          error={(stringError['email'] && fireErrorBtn) || (form!.email == '' && fireErrorBtn)}
+          errorCall={form!.email == '' ? 'Insira um e-mail' : 'Insira um e-mail válido!' }
           onChange={(e) => onChangeFunc(e, (val) => setForm!(prev => ({ ...prev, email: String(val) })), 'email', 'email')}
           />
 

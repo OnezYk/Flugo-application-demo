@@ -78,6 +78,12 @@ const Colaboradores = () => {
     return <Navigate to="/login" />
   }
 
+  const refreshDepartamentos = () => {
+
+    getDepartamentos().then(data => {setDepartamentos(data)})
+
+  }
+
   return (
     <>
     <Box
@@ -117,15 +123,18 @@ const Colaboradores = () => {
 
       </Box>
       
-      <Box sx={{ display: 'flex', gap:2, height: 50, alignItems: 'center'}}>
-
-        <FilterBtn filter={filter} handleFilter={(value) => setFilter(value)} />
-
-        <InputField placeholder="Pesquise um colaborador do departamento" value={query} onChange={(e) => setQuery(e.target.value)}/>
-
-      </Box>
       {departamentos.length >= 1 
-        ? <DepartamentosTab query={query} filter={filter} activeTab={activeTab} setActiveTab={setActiveTab} />
+        ? 
+        <>
+        <Box data-aos='fade-right' sx={{ display: 'flex', gap:2, height: 50, alignItems: 'center'}}>
+
+          <FilterBtn filter={filter} handleFilter={(value) => setFilter(value)} />
+
+          <InputField placeholder="Pesquise um colaborador do departamento" value={query} onChange={(e) => setQuery(e.target.value)}/>
+
+        </Box>
+         <DepartamentosTab query={query} filter={filter} activeTab={activeTab} setActiveTab={setActiveTab} refreshDepartamentos={refreshDepartamentos}/>
+        </>
         : <Typography data-aos="fade-right" data-aos-delay="150" data-aos-duration="800" variant="h2" sx={{
           mt: {sm:2, xs:7},
           fontSize: 20,
@@ -139,33 +148,29 @@ const Colaboradores = () => {
 };
 
 // Tabela de colabDoradores
-const DepartamentosTable = ({ query, filter, activeTab }: {
-  query: string; filter: string; activeTab: string
+const DepartamentosTable = ({ query, filter, activeTab, refreshParent, setOpenCreateCrud, colaboradores, setColaboradores }: {
+  query: string; filter: string; activeTab: string; refreshParent: () => void
+  openCreateCrud: boolean
+  setOpenCreateCrud: (v: boolean) => void
+  colaboradores: ColaboradorProp[]                        // ✅
+  setColaboradores: React.Dispatch<React.SetStateAction<ColaboradorProp[]>>  // ✅
 }) => {
 
-  const [colaboradores, setColaboradores] = useState<ColaboradorProp[]>([])
-  const [departamentos, setDepartamentos] = useState<string[]>([])
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc')
   
   // CRUD
   const [openCrud, setOpenCrud] = useState(false)
   const [openDeleteGestor, setOpenDeleteGestor] = useState(false)
   const [gestorId, setGestorId] = useState('false')
-  const [openCreateCrud, setOpenCreateCrud] = useState(false)
   const [selectedColaborador, setSelectedColaborador] = useState<ColaboradorProp | null>(null)
   const [isEdit, setIsEdit] = useState(false)
   const [selected, setSelected] = useState<string[]>([])
   
   // Fetch na montagem do componente
 
-  useEffect(() => {
-    getColaboradores().then(data => {
-      setColaboradores(data)
-    })
-    getDepartamentos().then(data => {
-      setDepartamentos(data.map(d => d.nome))
-    })
-  }, [])
+    useEffect(() => {
+      AOS.init();
+    }, [])
 
     const results = () => {
       return fuzzySearch(colaboradores, filter, query)
@@ -214,6 +219,8 @@ const DepartamentosTable = ({ query, filter, activeTab }: {
     }
     deleteColaborador(id);
     getColaboradores().then(data => setColaboradores(data));
+    refreshParent();
+    setSelected([])
     
   }
   
@@ -230,6 +237,8 @@ const DepartamentosTable = ({ query, filter, activeTab }: {
       deleteColaborador(selection);
     })
     getColaboradores().then(data => setColaboradores(data));
+
+    setSelected([])
     
   }
 
@@ -239,15 +248,23 @@ const DepartamentosTable = ({ query, filter, activeTab }: {
 
   }
 
-  
-
+  const refresh = () => {
+  getColaboradores().then(data => {
+    setColaboradores(data);
+    refreshParent(); 
+  })
+  }
   return (
    <>
-   {departamentos.length >= 1 ?  // Caso tenha colaboradores na Firestore ->
 
   <>
 
-  <DeleteGestor selectedId={gestorId} refresh={() => getColaboradores().then(data => setColaboradores(data))} open={openDeleteGestor} handleClose={() => setOpenDeleteGestor(false)}/>
+    <DeleteGestor
+    selectedId={gestorId}
+    refresh={refresh}
+    open={openDeleteGestor}
+    handleClose={() => setOpenDeleteGestor(false)}
+    />
 
   <Crud 
     refresh={() => getColaboradores().then(data => setColaboradores(data))}
@@ -256,15 +273,6 @@ const DepartamentosTable = ({ query, filter, activeTab }: {
     colaborador={selectedColaborador} 
     open={openCrud} 
     handleClose={() => setOpenCrud(false)}
-  />
-
-  <CreateCrud
-    refresh={() => getColaboradores().then(data => setColaboradores(data))}
-    key={selectedColaborador?.id} // força remontagem ao trocar colaborador
-    selectedDepartamento={String(activeTab)}
-    colaborador={selectedColaborador} 
-    open={openCreateCrud} 
-    handleClose={() => setOpenCreateCrud(false)}
   />
 
    <TableContainer data-aos="fade-in" data-aos-duration="800"
@@ -365,11 +373,13 @@ const DepartamentosTable = ({ query, filter, activeTab }: {
               ))}
             </>
           )}
+              {colaboradores.filter((obj) => obj.senioridade !== 'Gestor').length > 0 && 
               <TableRow>
                 <TableCell colSpan={6} sx={{ fontWeight: 600, bgcolor: 'white', color: 'text.primary', fontSize: 18}}>
                    Colaboradores:
                 </TableCell>
               </TableRow>
+              }
           {regular.map((row:ColaboradorProp, index) => (
             // Animação em cascata de acordo com qtd de elementos
             <Fade in={true} timeout={300 + index * 200} key={row.id}>
@@ -422,12 +432,16 @@ const DepartamentosTable = ({ query, filter, activeTab }: {
       </Table>
     </TableContainer> 
     <Box sx={{display: 'flex', justifyContent: 'space-between'}}>
-      <PrimaryBtn onClick={handleBulkDelete} disabled={selected.length < 1} >Deletar selecionados</PrimaryBtn>
-      <PrimaryBtn onClick={handleAddCrud} >Adicionar colaborador</PrimaryBtn>
+      <Box data-aos="fade-in" data-aos-duration='800'>
+        <PrimaryBtn onClick={handleBulkDelete} disabled={selected.length < 1}>
+          Deletar selecionados
+        </PrimaryBtn>
+      </Box>
+      <Box data-aos="fade-in" data-aos-duration='800'>
+        <PrimaryBtn onClick={handleAddCrud} >Adicionar colaborador</PrimaryBtn>
+      </Box>
     </Box>
     </>
-    : // Caso não há departamentos na Firestore ->
-       <Box>a</Box> }
     </>
   );
 };
@@ -449,12 +463,13 @@ const FilterBtn = ({ handleFilter, filter }: {handleFilter: (value: string) => v
   );
 };
 
-const DepartamentosTab = ({ query, filter, activeTab, setActiveTab }: {
-  query: string; filter: string; activeTab: string; setActiveTab: (v: string) => void
+const DepartamentosTab = ({ query, filter, activeTab, setActiveTab, refreshDepartamentos }: {
+  query: string; filter: string; activeTab: string; setActiveTab: (v: string) => void, refreshDepartamentos: () => void
 }) => {
   const [departamentos, setDepartamentos] = useState<string[]>([])
   const [colaboradores, setColaboradores] = useState<ColaboradorProp[]>([])
   const [openDeleteTab, setOpenDeleteTab] = useState(false)
+  const [openCreateCrud, setOpenCreateCrud] = useState(false)
 
   useEffect(() => {
     getDepartamentos().then(data => {
@@ -465,13 +480,23 @@ const DepartamentosTab = ({ query, filter, activeTab, setActiveTab }: {
     getColaboradores().then(data => setColaboradores(data))
   }, [])
 
-  const hasColaboradores = colaboradores.some(c => c.departamento === activeTab)
-
+  const refreshColaboradores = () => {
+    getColaboradores().then(data => setColaboradores(data))
+    refreshDepartamentos()
+  }
 
   return (
     <>
 
-      <DeleteTab  // ← add this
+      <CreateCrud
+        refresh={() => getColaboradores().then(data => setColaboradores(data))}
+        selectedDepartamento={String(activeTab)}
+        colaborador={null}
+        open={openCreateCrud} 
+        handleClose={() => setOpenCreateCrud(false)}
+      />
+
+      <DeleteTab
         open={openDeleteTab}
         handleClose={() => setOpenDeleteTab(false)}
         activeTab={activeTab}
@@ -479,6 +504,8 @@ const DepartamentosTab = ({ query, filter, activeTab, setActiveTab }: {
           const deps = data.map(d => d.nome)
           setDepartamentos(deps)
           setActiveTab(deps[0] ?? '')
+          refreshDepartamentos()
+          getColaboradores().then(d => setColaboradores(d)) 
         })}
       />
 
@@ -494,7 +521,7 @@ const DepartamentosTab = ({ query, filter, activeTab, setActiveTab }: {
             <Tab key={`${dep}-${i}`} label={dep} value={dep} />
           ))}
       </Tabs>
-      <Button onClick={() => setOpenDeleteTab(true)} sx={{
+      <Button data-aos='fade-in' data-aos-duration= '1500' onClick={() => setOpenDeleteTab(true)} sx={{
         bgcolor: 'error.main',
         fontWeight: 600,
         color: 'white',
@@ -506,11 +533,27 @@ const DepartamentosTab = ({ query, filter, activeTab, setActiveTab }: {
       }}>Excluir departamento</Button>
     </Box>
 
-      {hasColaboradores
-        ? <DepartamentosTable query={query} filter={filter} activeTab={activeTab} />
-        : <Typography sx={{ mt: 4, color: 'text.secondary', fontSize: 25, fontWeight: 600 }}>
+      {colaboradores.filter(c => c.departamento === activeTab).length > 0
+        ? 
+        <DepartamentosTable
+          query={query}
+          filter={filter}
+          activeTab={activeTab}
+          refreshParent={refreshColaboradores}
+          openCreateCrud={openCreateCrud}
+          setOpenCreateCrud={setOpenCreateCrud}
+          colaboradores={colaboradores}        // ✅
+          setColaboradores={setColaboradores}  // ✅
+        />
+        : 
+        <>
+        <Typography data-aos='fade-in' data-aos-duration='800' sx={{ mt: 4, mb:4, color: 'text.secondary', fontSize: 25, fontWeight: 600 }}>
             Nenhum colaborador neste departamento.
           </Typography>
+          <Box data-aos="fade-in" data-aos-duration='800'>
+            <PrimaryBtn onClick={() => setOpenCreateCrud(true)}>Adicionar colaborador</PrimaryBtn>
+          </Box>
+        </>
       }
     </>
   )

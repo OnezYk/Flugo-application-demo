@@ -35,32 +35,46 @@ import { useAuth } from "../hooks/useAuth";
 
 // Routes
 import {getColaboradores} from '../utils/getColaborador';
-import { Navigate } from 'react-router-dom'
+import { Navigate, useNavigate } from 'react-router-dom'
 import { deleteColaborador } from "../utils/deleteColaborador";
 
 import Crud from "../components/Crud";
 import InputField from "../components/InputField";
 import { fuzzySearch } from "../utils/filterTabela";
+import { getDepartamentos, type DepartamentoType } from "../utils/routesDepartamento";
 
 const Colaboradores = () => {
 
   const [query, setQuery] = useState('')
   const [filter, setFilter] = useState('')
   
+  const [departamentos, setDepartamentos] = useState<DepartamentoType[]>([])
 
   const { userLoggedIn  } = useAuth()
   
+  const navigate = useNavigate()
   const isSmall = useMediaQuery('(max-width: 660px)'); // True quando media < 660px
   const isXSmall = useMediaQuery('(max-width: 500px)'); // True quando media < 660px
   
   // Inicialização da biblioteca de animação
   useEffect(() => {
-    AOS.init()
+    AOS.init();
+    getDepartamentos().then(data => {setDepartamentos(data); console.log(data)});
   },[query])
   
 
   if (!userLoggedIn) {
     return <Navigate to="/login" />
+  }
+
+  const handleNewColaborador = () => {
+
+    if(departamentos.length == 0) {
+      alert("Crie um departamento primeiro!");
+      return
+    }
+    navigate('/formulario');
+
   }
 
   return (
@@ -96,18 +110,20 @@ const Colaboradores = () => {
         </Typography>
 
         <Box data-aos="fade-right" data-aos-duration="800" data-aos-delay="250">
-          <PrimaryBtn to="/formulario"> Novo Colaborador </PrimaryBtn>
+          <PrimaryBtn onClick={handleNewColaborador}> Novo Colaborador </PrimaryBtn>
         </Box>
 
       </Box>
       
-      <Box sx={{ display: 'flex', gap:2, height: 50, alignItems: 'center'}}>
+      {Colaboradores.length > 0 && 
+      <Box data-aos='fade-right' sx={{ display: 'flex', gap:2, height: 50, alignItems: 'center'}}>
 
         <FilterBtn filter={filter} handleFilter={(value) => setFilter(value)} />
 
         <InputField placeholder="Pesquise um colaborador" value={query} onChange={(e) => setQuery(e.target.value)}/>
 
       </Box>
+      }
         <ColaboradoresTable query={query} filter={filter} />
     </Box>
   );
@@ -118,6 +134,7 @@ const ColaboradoresTable = ({query, filter}:{query: string, filter:string}) => {
 
   
   const [colaboradores, setColaboradores] = useState<ColaboradorProp[]>([])
+
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc')
   
   // CRUD
@@ -131,7 +148,7 @@ const ColaboradoresTable = ({query, filter}:{query: string, filter:string}) => {
   useEffect(() => {
 
     getColaboradores().then(data => setColaboradores(data));
-    
+
   },[])
 
   // Criação procedural de avatar
@@ -167,6 +184,7 @@ const ColaboradoresTable = ({query, filter}:{query: string, filter:string}) => {
 
     deleteColaborador(id);
     getColaboradores().then(data => setColaboradores(data));
+    setSelected([])
     
   }
   
@@ -184,6 +202,8 @@ const ColaboradoresTable = ({query, filter}:{query: string, filter:string}) => {
     })
     getColaboradores().then(data => setColaboradores(data));
     
+    setSelected([])
+
   }
 
   return (

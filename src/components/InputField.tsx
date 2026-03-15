@@ -1,6 +1,6 @@
 import { TextField } from "@mui/material"
 
-const InputField = ({info, value, onChange, error, errorCall, isEdit = true, placeholder} : {
+const InputField = ({info, value, onChange, error, errorCall, isEdit = true, placeholder, type = 'off'} : {
   info?: string, 
   value: string, 
   onChange: (e: React.ChangeEvent<HTMLInputElement>) => void,
@@ -8,6 +8,7 @@ const InputField = ({info, value, onChange, error, errorCall, isEdit = true, pla
   errorCall?: string,
   isEdit?: boolean,
   placeholder?: string
+  type?: string
 }) => {
   return (
     <TextField
@@ -17,7 +18,7 @@ const InputField = ({info, value, onChange, error, errorCall, isEdit = true, pla
       fullWidth
       error={error}
       helperText={error ? errorCall : ''}
-      autoComplete='off'
+      autoComplete={type}
       value={value}
       onChange={onChange}
       slotProps={{

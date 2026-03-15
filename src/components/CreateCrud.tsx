@@ -87,14 +87,12 @@ export const CreateCrud = ({ open, handleClose, refresh, selectedDepartamento}: 
   /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(newColaborador.email);
 
   const handleSubmit = async () => {
-
     if (isAllValid) {
-
-    await postColaborador(newColaborador);
-    refresh();
-    handleReset()
+      await postColaborador({ ...newColaborador, departamento: selectedDepartamento }) // ✅
+      refresh()
+      handleReset()
+    }
   }
-}
 
   const handleClick = () => {
     setErrorBtn(true)
@@ -171,8 +169,8 @@ return (
           <InputField
             info="E-mail"
             value={newColaborador!.email}
-            error={stringError['email'] || errorBtn}
-            errorCall={stringError['email'] ? 'Insira um e-mail válido!' : 'Insira um e-mail'}
+            error={(errorBtn && stringError['email']) || (errorBtn && newColaborador!.email == '')}
+            errorCall={newColaborador!.email == '' ? 'Insira um e-mail' : 'Insira um e-mail válido!'}
             onChange={(e) => onChangeFunc(e, (val) => setNewColaborador!(prev => ({...prev!, email: String(val)})), 'email', 'email')}
           />
 

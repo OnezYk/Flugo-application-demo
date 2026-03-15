@@ -58,8 +58,8 @@ const DeleteTab = ({ open, handleClose, activeTab, refresh }: DeleteTabProps) =>
         <Button onClick={handleClose} variant="contained" sx={{ bgcolor: 'text.disabled', color: 'text.primary' }}>
           Cancelar
         </Button>
-        <Button variant="contained" color="error" onClick={() => {
-          deleteDepartamento(selectedId, selected).catch(error => alert(error))
+        <Button variant="contained" color="error" onClick={async () => {
+          await deleteDepartamento(selectedId, selected).catch(error => alert(error))
           refresh()
           handleClose()
         }}>

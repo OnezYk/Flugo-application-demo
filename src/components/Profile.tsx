@@ -60,14 +60,19 @@ const FloatingTab = ({open}: {open:boolean}) => {
         <Box onClick={(e) => e.stopPropagation()} sx={{
           position:'absolute',
           overflow: 'hidden',
+          display: 'flex',
           width: open ? 170 : 0, height:open ? 40 : 0, top:45, right: 70,
           zIndex: '15',
-          bgcolor: 'text.disabled',
+          bgcolor: 'white',
           borderRadius: 2,
           boxShadow: 4,
-          transition: 'all 0.3s ease'
+          transition: 'all 0.3s ease',
+          border: open ? '2px solid' : '0px',
+          borderColor: 'text.secondary',
+          ':hover': {borderColor: 'error.main'}
+
         }}>
-          <Button onClick={doSignOut} sx={{width: '100%', color:'text.primary'}}>
+          <Button onClick={doSignOut} sx={{width: '100%', color:'text.secondary', fontWeight: 600, transition: 'all 0.2s', ':hover': {color: 'error.main', bgcolor: 'error.light'}}}>
             Desconectar?
           </Button>
         </Box>
