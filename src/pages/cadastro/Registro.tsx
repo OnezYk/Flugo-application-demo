@@ -15,7 +15,7 @@ import Stack from '@mui/material/Stack';
 import MuiCard from '@mui/material/Card';
 import { styled } from '@mui/material/styles';
 import FlugoLogo from '../../assets/flugoLogo.png'
-import { GoogleIcon } from '../../assets/CustomIcons';
+import { FacebookIcon, GoogleIcon } from '../../assets/CustomIcons';
 import { registerUser, signWith } from '../../utils/checkUser';
 import { useNavigate } from 'react-router-dom';
 
@@ -208,12 +208,6 @@ export default function Login() {
               />
             </FormControl>
 
-            {/* Voltar se tiver tempo */}
-            {/* <FormControlLabel
-              control={<Checkbox value="remember" color="primary" />}
-              label="Mantenha-me logado"
-            /> */}
-
             <Button
               type="submit"
               fullWidth
@@ -223,18 +217,6 @@ export default function Login() {
             >
               Registre-se
             </Button>
-
-
-            {/* Voltar se tiver tempo: */}
-            {/* <Link
-              component="button"
-              type="button"
-              variant="body2"
-              sx={{ alignSelf: 'center' }}
-            >
-              Esqueceu a senha?
-            </Link> */}
-
 
           </Box>
           <Divider>ou</Divider>
@@ -248,6 +230,15 @@ export default function Login() {
               
               >
               Entre com o google
+            </Button>
+            <Button
+              fullWidth
+              variant="outlined"
+              onClick={() => handlePopUpSign('facebook')}
+              startIcon={<FacebookIcon />}
+              sx={{color:'black'}}
+            >
+              Entre com o facebook
             </Button>
             <Typography sx={{ textAlign: 'center' }}>
               Já tem uma conta?{' '}

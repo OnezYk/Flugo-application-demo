@@ -38,13 +38,13 @@ const Navbar = () => {
       }
       
       {/* Condição de aparição de ícone mobile */}
-      {isMobile && (
+      {isMobile && !open && (  // adiciona && !open
         <Box 
           onClick={() => setOpen(p => !p)} 
           sx={{
             position: 'absolute', 
             top: 20, 
-            left: {xs: '110px'},
+            left: {xs: '20px'},  // posição correta
             color: 'text.primary', 
             transition: 'all 0.3s ease',
             zIndex: 20,
@@ -104,10 +104,10 @@ const BigNav = ({open, setOpen} : {open:boolean, setOpen: () => void}) => {
       
       <Box sx={{display:'flex', flexDirection: 'column', gap: 1}}>
         <Card to='colaboradores' icon={
-          <AccountBoxIcon sx={{ fontSize: isSmall ? 50 : 30 }}/>
+          <AccountBoxIcon sx={{ fontSize: isSmall ? 50 : 30}}/>
         } setOpen={setOpen}>Colaboradores</Card>
         <Card to='departamentos' icon={
-          <FolderCopyRounded sx={{ fontSize: isSmall ? 50 : 30 }}/>
+          <FolderCopyRounded sx={{ fontSize: isSmall ? 50 : 30}}/>
         } setOpen={setOpen}>Departamentos</Card>
       </Box>
 
@@ -124,8 +124,10 @@ const Card = ({children, setOpen, icon, to}: {children:string, setOpen: () => vo
 
   return(
     <Box 
+    
     onClick={() => navigate(`/${to}`)}
     sx={{     
+      mb: isSmall ? 2 : 0, 
       height: '40px',
       display: "flex",
       borderRadius: 2,

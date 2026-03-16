@@ -53,7 +53,7 @@ export type ColaboradorProp = ColaboradorFormData & {id: string};
 
 const Colaboradores = () => {
   const [query, setQuery] = useState("");
-  const [filter, setFilter] = useState("");
+  const [filter, setFilter] = useState("nome");
   const [departamentos, setDepartamentos] = useState<DepartamentoType[]>([]);
   const [hasColaboradores, setHasColaboradores] = useState(false);
 
@@ -514,9 +514,6 @@ const FilterBtn = ({
         displayEmpty
         onChange={(e: SelectChangeEvent) => handleFilter(e.target.value)}
       >
-        <MenuItem value="" disabled>
-          Pesquisar por
-        </MenuItem>
         <MenuItem value="nome">Nome</MenuItem>
         <MenuItem value="email">Email</MenuItem>
         <MenuItem value="departamento">Departamento</MenuItem>

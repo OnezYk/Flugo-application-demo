@@ -183,7 +183,7 @@ export const CreateCrud = ({
           <InputField
             info="Nome"
             value={newColaborador.nome}
-            error={Boolean(stringError["nome"] || errorBtn)}
+            error={Boolean(stringError["nome"] || (errorBtn && newColaborador!.nome == ""))}
             errorCall={
               stringError["nome"] ? "caractere inválido" : "Insira um nome"
             }
@@ -242,7 +242,7 @@ export const CreateCrud = ({
           <InputField
             info="Cargo"
             value={newColaborador!.cargo}
-            error={stringError["cargo"] || errorBtn}
+            error={stringError["cargo"] || (errorBtn && newColaborador!.cargo == "")}
             errorCall={
               stringError["cargo"] ? "Caractere inválido!" : "Insira um cargo!"
             }
@@ -276,7 +276,7 @@ export const CreateCrud = ({
           <InputField
             info="Salário"
             value={toBRL(Number(newColaborador!.salarioBase))}
-            error={salarioError || errorBtn}
+            error={salarioError || (errorBtn && newColaborador!.salarioBase == 0)}
             errorCall={salarioError ? erroSalarioReason : "Insira um valor"}
             onChange={(e) =>
               onChangeFunc(

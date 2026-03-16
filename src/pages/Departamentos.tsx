@@ -77,7 +77,7 @@ type DepartamentosTabProps = {
 
 const Colaboradores = () => {
   const [query, setQuery] = useState("");
-  const [filter, setFilter] = useState("");
+  const [filter, setFilter] = useState("nome");
   const [activeTab, setActiveTab] = useState("");
   const [departamentos, setDepartamentos] = useState<DepartamentoType[]>([]);
 
@@ -323,15 +323,14 @@ const DepartamentosTable = ({
         />
 
         <TableContainer
-          data-aos="fade-in"
-          data-aos-duration="800"
+
           sx={{
             boxShadow: 3,
             borderColor: "text.disabled",
             borderRadius: 2,
             marginTop: 2,
-            maxHeight: "calc(100vh - 200px)",
-            overflowY: colaboradores.length >= 6 ? "scroll" : "hidden",
+            maxHeight: "calc(73vh - 220px)", // troca o calc anterior por isso
+            overflowY: "auto", // sempre auto, não condicional
             mb: 4,
           }}
         >
@@ -473,7 +472,8 @@ const DepartamentosTable = ({
                   ))}
                 </>
               )}
-              {colaboradores.filter((obj) => obj.senioridade !== "Gestor")
+              {colaboradores
+                .filter((obj) => obj.senioridade !== "Gestor" && obj.departamento === activeTab)
                 .length > 0 && (
                 <TableRow>
                   <TableCell
@@ -579,20 +579,13 @@ const DepartamentosTable = ({
             </TableBody>
           </Table>
         </TableContainer>
-        <Box sx={{display: "flex", justifyContent: "space-between"}}>
-          <Box data-aos="fade-in" data-aos-duration="800">
-            <PrimaryBtn
-              onClick={handleBulkDelete}
-              disabled={selected.length < 1}
-            >
-              Deletar selecionados
-            </PrimaryBtn>
-          </Box>
-          <Box data-aos="fade-in" data-aos-duration="800">
-            <PrimaryBtn onClick={handleAddCrud}>
-              Adicionar colaborador
-            </PrimaryBtn>
-          </Box>
+        <Box sx={{ display: "flex", justifyContent: "space-between", flexShrink: 0 }}>
+          <PrimaryBtn onClick={handleBulkDelete} disabled={selected.length < 1}>
+            Deletar selecionados
+          </PrimaryBtn>
+          <PrimaryBtn onClick={handleAddCrud}>
+            Adicionar colaborador
+          </PrimaryBtn>
         </Box>
       </>
     </>
@@ -615,9 +608,6 @@ const FilterBtn = ({
         displayEmpty
         onChange={(e: SelectChangeEvent) => handleFilter(e.target.value)}
       >
-        <MenuItem value="" disabled>
-          Pesquisar por
-        </MenuItem>
         <MenuItem value="nome">Nome</MenuItem>
         <MenuItem value="email">Email</MenuItem>
       </Select>
