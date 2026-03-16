@@ -1,12 +1,12 @@
-import { Box, Avatar, Button } from '@mui/material'
-import { useState } from 'react'
+import { useState } from 'react';
 
-// Avatares
+import { Box, Avatar, Button } from '@mui/material';
+
 import { notionists } from '@dicebear/collection';
 import { createAvatar } from "@dicebear/core";
 import { doSignOut } from '../hooks/useAuth';
 
-// Criação de um avatar random
+// Criação de um avatar aleatório
 const avatar = createAvatar(notionists, { 
   seed: 'Amanda',
   backgroundColor: ['2ec1f2']
@@ -14,7 +14,7 @@ const avatar = createAvatar(notionists, {
 
 const Profile = () => {
 
-  const [open, setOpen] = useState (false)
+  const [open, setOpen] = useState (false);
 
   return (
     <>
@@ -23,6 +23,7 @@ const Profile = () => {
     <Box onClick={() => setOpen(false)} sx={{width: '100vw', height: '100vh', position: 'absolute', zIndex: '10'}}></Box>
     }
 
+    {/* Componente sign-out */}
     <FloatingTab open={open}/>
 
     <Box sx={{
@@ -48,15 +49,17 @@ const Profile = () => {
     </Box>
     </>
   )
-}
+};
 
-export default Profile
+export default Profile;
 
+// Floating tab para sign-out
 const FloatingTab = ({open}: {open:boolean}) => {
 
   return (
 
     <>
+
         <Box onClick={(e) => e.stopPropagation()} sx={{
           position:'absolute',
           overflow: 'hidden',
@@ -76,8 +79,9 @@ const FloatingTab = ({open}: {open:boolean}) => {
             Desconectar?
           </Button>
         </Box>
+
     </>
 
   )
 
-}
+};

@@ -1,24 +1,17 @@
-import { 
-  Dialog, 
-  DialogContent, 
-  DialogActions, 
-  Button, 
-  Box,
-  IconButton,
-  Typography,
-  DialogTitle,
-  Chip,
-  Divider
-} from '@mui/material';
-import CloseIcon from '@mui/icons-material/Close';
-import type { ColaboradorProp } from '../pages/Colaboradores';
-import InputField from './InputField';
 import { useForm } from '../hooks/useForm';
 import { useEffect, useState } from 'react';
-import type { ColaboradorFormData } from '../pages/Formulario';
+
+import {  Dialog,  DialogContent,  DialogActions,  Button,  Box, IconButton, Typography, DialogTitle, Chip, Divider} from '@mui/material';
+import CloseIcon from '@mui/icons-material/Close';
+
+import InputField from './InputField';
 import InputSelect from './InputSelect';
+
 import { putColaborador } from '../utils/editColaborador';
 import { getDepartamentos } from '../utils/routesDepartamento';
+
+import type { ColaboradorProp } from '../pages/Colaboradores';
+import type { ColaboradorFormData } from '../pages/Formulario';
 
 type CrudInfoProps = {
 
@@ -33,23 +26,26 @@ type CrudProps = CrudInfoProps & {
   open: boolean,
   colaborador: ColaboradorProp | null,
   handleClose?: () => void,
-  refresh: () => void
+  refresh: () => void,
+  colaboradores: ColaboradorProp[]
 
 }
 
-export const Crud = ({ open, handleClose, colaborador, isEdit, refresh}: CrudProps) => {
-  // Determine if we are editing or creating
+// Floating tab para visualização / edição via condição: isEdit 
+export const Crud = ({ open, handleClose, colaborador, isEdit, refresh, colaboradores}: CrudProps) => {
+
   const {toBRL, onChangeFunc, stringError, salarioError, erroSalarioReason} = useForm()
 
-  
   const [editColaborador, setEditColaborador] = useState<ColaboradorFormData | null>(colaborador ?? null)
   const [departamentos, setDepartamentos] = useState<string[]>([])
 
+  // Reset e fechamento do formulário
   const handleReset = () => {
     setEditColaborador(colaborador);
     handleClose?.();
   }
 
+  // Fetch para opções de realocação de departamentos existentes
   useEffect(() => {
 
     getDepartamentos().then(data => 
@@ -61,15 +57,34 @@ export const Crud = ({ open, handleClose, colaborador, isEdit, refresh}: CrudPro
     return null
   }
 
+  // Para prevenir renderização nula de "EditColaborador", ele copia os valores do colaborador
   const displayData = editColaborador ?? colaborador;
 
+  // Submit, re-fetch e fechamento da tab
   const handleSubmit = () => {
 
     putColaborador(colaborador.id, editColaborador!);
     refresh();
-    handleClose?.();
+    handleReset();
 
   }
+
+  // Check de gestor para edit InputSelect em senioridade
+  const currentDepartamento = editColaborador?.departamento ?? colaborador.departamento
+  const currentSenioridade = editColaborador?.senioridade ?? colaborador.senioridade
+  const isGestor = currentSenioridade === 'Gestor'
+
+  const hasGestor = colaboradores.some(
+    c => c.departamento === currentDepartamento
+      && c.senioridade === 'Gestor'
+      && c.id !== colaborador.id  // exclui ele mesmo
+  )
+
+  const senioridadeItems = (() => {
+  const base = ['Estagiário', 'Júnior', 'Pleno', 'Sênior']
+  if (isGestor) return ['Gestor']
+  return hasGestor ? base : [...base, 'Gestor']
+  })()
 
 return (
     <Dialog 
@@ -80,20 +95,21 @@ return (
       slotProps={{
         paper: {
           sx:{
-          borderRadius: '20px', // Rounder corners for the "floating" look
+          borderRadius: '20px', 
           padding: 1,
-          boxShadow: '0px 20px 50px rgba(0,0,0,0.1)' // Soft deep shadow
+          boxShadow: '0px 20px 50px rgba(0,0,0,0.1)'
         }
         }
       }}
     >
 
-      {/* Header with Close Button */}
       <DialogTitle component='div' sx={{ m: 0, p: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <Box sx={{display: 'flex',alignItems: 'center', gap: 1}}>
+
           <Typography variant="h6" fontWeight="bold" sx={{ml: 1}}>
             {isEdit ? 'Editar Registro' : `Colaborador: ${colaborador.nome}` }
           </Typography>
+
             <Chip
               label={editColaborador?.status ? "Ativo" : "Inativo"}
               size="medium"
@@ -108,6 +124,7 @@ return (
                 fontSize: 12,
               }}
             />
+
         </Box>
         <IconButton onClick={handleReset}>
           <CloseIcon />
@@ -118,16 +135,14 @@ return (
 
         <Box component="form" sx={{ display: 'grid', gridTemplateRows: '1fr 1fr', gap: 3, mt: 1}}>
 
-          {/* Infos */}
+          {/* Infos básicas */}
           <InputField
             info="Nome"
             value={isEdit ? displayData.nome : colaborador.nome}
             error={stringError['nome'] || displayData.nome.trim() === ''}
             errorCall={!stringError ? 'Insira um nome' : 'caractere inválido'}
             isEdit={isEdit}
-            // Ao digitar, insere valor em val e testa de imediato para prever erro
             onChange={(e) => {
-
               onChangeFunc(e, (val) => setEditColaborador!(prev => ({...prev!, nome: String(val)})), 'string', 'nome')}}
           />
 
@@ -146,14 +161,13 @@ return (
 
         <Box component="form" sx={{ display: 'grid', gridTemplateRows: '1fr 1fr', gridTemplateColumns: '1fr 1fr', gap: 3, mt: 1 }}>
 
-          {/* Infos */}
+          {/* Infos profissionais */}
           <InputField
             info="Cargo"
             value={isEdit ? displayData.cargo : colaborador.cargo}
             error={stringError['cargo'] || displayData.cargo.trim() === ''}
             errorCall={'Caractere inválido!'}
             isEdit={isEdit}
-            // Ao digitar, insere valor em val e testa de imediato para prever erro
             onChange={(e) => onChangeFunc(e, (val) => setEditColaborador!(prev => ({...prev!, cargo: String(val)})), 'string', 'cargo')}
           />
 
@@ -176,21 +190,15 @@ return (
 
           <InputSelect 
             title='Senioridade' 
-            items={
-              (editColaborador?.senioridade ?? colaborador.senioridade) === 'Gestor'
-                ? ['Gestor']
-                : ['Estagiário', 'Júnior', 'Pleno', 'Sênior']
-            } 
-            value={editColaborador?.senioridade ?? colaborador.senioridade} 
+            items={senioridadeItems}
+            value={currentSenioridade}
             onChange={(e) => setEditColaborador(prev => ({...prev!, senioridade: e.target.value}))}
             isEdit={isEdit}
           />
 
         </Box>
 
-                
-
-
+        {/* ------------------------------------------------------ */}
 
       </DialogContent>
 

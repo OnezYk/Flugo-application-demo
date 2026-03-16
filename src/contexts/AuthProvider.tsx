@@ -1,15 +1,19 @@
-import { onAuthStateChanged } from "firebase/auth";
-import type { User } from "firebase/auth";
 import { useEffect, useState, type ReactNode } from "react";
-import { auth } from "../utils/db";
+
 import { AuthContext } from "./AuthContext";
 
+import { onAuthStateChanged } from "firebase/auth";
+import type { User } from "firebase/auth";
+import { auth } from "../utils/db";
+
+// UseContext do JWT autentication do firebase.
 export function AuthProvider ({ children }: {children: ReactNode}) {
 
   const [currentUser, setCurrentUser] = useState<User | null>(null)
   const [userLoggedIn, setUserLoggedIn] = useState(false)
   const [loading, setLoading] = useState(true)
 
+  // Ativa quando componente monta, ou em "authStateChanged" disparado pelo firebase  
   async function initializeUser (user : User | null) {
 
     if (user) {

@@ -7,6 +7,7 @@ interface AuthContextType {
   loading: boolean
 }
 
+// Declara o useContext para AuthProvider
 export const AuthContext = createContext<AuthContextType>({
   currentUser: null,
   userLoggedIn: false,

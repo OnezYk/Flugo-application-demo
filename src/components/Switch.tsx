@@ -5,7 +5,7 @@ import type { SwitchProps } from '@mui/material/Switch';
 // Componentes
 import Switch from '@mui/material/Switch';
 
-// Switch
+// Switch importado de MUI
 const MUISwitch = styled((props: SwitchProps) => (
   <Switch focusVisibleClassName=".Mui-focusVisible" disableRipple {...props} />
 ))(({ theme }) => ({

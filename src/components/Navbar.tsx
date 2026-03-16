@@ -1,27 +1,22 @@
-// React
 import { useNavigate } from "react-router-dom";
 import { useState, type ReactNode } from "react";
 
-// Logos
 import flugoLogo from '../assets/flugoLogo.png';
 import flugoLogoSm from '../assets/mobileLogo.png';
 
-// MUI assets
 import { useMediaQuery, useTheme, Box, Typography } from '@mui/material';
 import KeyboardArrowRightRoundedIcon from '@mui/icons-material/KeyboardArrowRightRounded';
 import AccountBoxIcon from '@mui/icons-material/AccountBox';
 import MenuRoundedIcon from '@mui/icons-material/MenuRounded';
-
-// Outros
-import '../globals.css';
 import { FolderCopyRounded } from "@mui/icons-material";
 
-// Navbar
+import '../globals.css';
+
 const Navbar = () => {
+
   const [open, setOpen] = useState(false);
   const theme = useTheme();
 
-  
   const isMobile = useMediaQuery(theme.breakpoints.down('md')); // true quando media < 900px
 
   return (

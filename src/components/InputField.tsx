@@ -1,6 +1,7 @@
-import { TextField } from "@mui/material"
+import { TextField } from "@mui/material";
 
-const InputField = ({info, value, onChange, error, errorCall, isEdit = true, placeholder, type = 'off'} : {
+type InputFieldProps = {
+
   info?: string, 
   value: string, 
   onChange: (e: React.ChangeEvent<HTMLInputElement>) => void,
@@ -9,7 +10,11 @@ const InputField = ({info, value, onChange, error, errorCall, isEdit = true, pla
   isEdit?: boolean,
   placeholder?: string
   type?: string
-}) => {
+
+};
+
+// Componente para texto
+const InputField = ({info, value, onChange, error, errorCall, isEdit = true, placeholder, type = 'off'} : InputFieldProps) => {
   return (
     <TextField
       label={info}
@@ -26,6 +31,6 @@ const InputField = ({info, value, onChange, error, errorCall, isEdit = true, pla
       }}
     />
   )
-}
+};
 
-export default InputField
+export default InputField;

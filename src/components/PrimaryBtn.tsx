@@ -1,10 +1,7 @@
-// React
 import { useNavigate } from 'react-router-dom';
 
-// MUI assets
 import { Button } from '@mui/material';
 
-// Type para props
 type BtnProps = {
 
   children: string,
@@ -15,7 +12,7 @@ type BtnProps = {
 
 };
 
-// Botão principal
+// Componente default para botão
 const PrimaryBtn = ({children, to, onClick, disabled, fullWidth}: BtnProps) => {
 
   const navigate = useNavigate();

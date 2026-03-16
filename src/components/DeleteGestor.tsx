@@ -1,13 +1,15 @@
-import { Box, Dialog, Typography, Button } from "@mui/material"
-import { deleteColaborador } from "../utils/deleteColaborador"
+import { Box, Dialog, Typography, Button } from "@mui/material";
+
+import { deleteColaborador } from "../utils/deleteColaborador";
 
 type DeleteTabProps = {
   open: boolean,
   handleClose: () => void,
   selectedId: string,
   refresh: () => void
-}
+};
 
+// Dialog para confirmação de deleção de gestor.
 const DeleteGestor = ({ open, handleClose, refresh, selectedId }: DeleteTabProps) => {
 
   return (
@@ -22,11 +24,11 @@ const DeleteGestor = ({ open, handleClose, refresh, selectedId }: DeleteTabProps
     >
       <Box>
         <Typography fontWeight={600} fontSize={18}>Excluir gestor?</Typography>
-        <Typography fontSize={15} sx={{color: 'text.secondary', mt: 1}}>O departamento ficará sem gestor até que você adicione outro em 'Adicionar colaborador'</Typography>
+        <Typography fontSize={15} sx={{color: 'text.secondary', mt: 1}}>O departamento ficará sem gestor até que você adicione outro.</Typography>
       </Box>
 
-
       <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+
         <Button onClick={handleClose} variant="contained" sx={{ bgcolor: 'text.disabled', color: 'text.primary' }}>
           Cancelar
         </Button>
@@ -37,9 +39,11 @@ const DeleteGestor = ({ open, handleClose, refresh, selectedId }: DeleteTabProps
         }}>
           Excluir
         </Button>
+        
       </Box>
+
     </Dialog>
   )
 }
 
-export default DeleteGestor
+export default DeleteGestor;

@@ -1,5 +1,5 @@
 // React
-import React, { useEffect, useState, type ReactNode } from 'react';
+import React, { useEffect, useRef, useState, type ReactNode } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 // MUI Assets
@@ -22,6 +22,8 @@ import { getDepartamentos } from '../utils/routesDepartamento';
 
 // Hooks
 import { useForm } from '../hooks/useForm';
+import type { ColaboradorProp } from './Colaboradores';
+import { getColaboradores } from '../utils/getColaborador';
 
 // Export da FormData
 export type ColaboradorFormData = {
@@ -42,7 +44,8 @@ type PassoProps = {
   setForm?: React.Dispatch<React.SetStateAction<ColaboradorFormData>>,
   children?: React.ReactNode,
   fireErrorBtn: boolean,
-  departamentos?: string[]
+  departamentos?: string[],
+  colaboradores?: ColaboradorProp[]
 }
 
 type StepProps = {
@@ -56,6 +59,7 @@ const Formulario = () => {
   const [fireErrorBtn, setFireErrorBtn] = useState(false);
 
   const [departamentos, setDepartamentos] = useState<string[]>([])
+  const [colaboradores, setColaboradores] = useState<ColaboradorProp[]>([])
   const [exitAnimation, setExitAnimation] = useState(true);
  
   const navigate = useNavigate();
@@ -86,8 +90,15 @@ const Formulario = () => {
 
   };
 
+  // Prevenção de click duplo
+  const submitting = useRef(false)
+
   // Handle do POST ao Firebase após "Concluido" 
   const handleSubmit = async () => {
+
+    if (submitting.current) return
+    submitting.current = true
+    
     await postColaborador(form);
     setExitAnimation(false);
     setTimeout(() => {
@@ -100,8 +111,18 @@ const Formulario = () => {
     getDepartamentos().then(data => 
       setDepartamentos(data.map(e => e.nome))
     )
+    getColaboradores(). then(data => setColaboradores(data))
     AOS.init()
   }, [])
+
+  const isValidPasso1 = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email) 
+  && /^[a-zA-ZÀ-ÿ\s]+$/.test(form.nome)
+
+  const isValidPasso2 = form.departamento !== ''
+  && form.cargo !== '' 
+  && form.senioridade !== ''
+
+  const currentValid = passo === 1 ? isValidPasso1 : isValidPasso2
 
   return (
     <Fade in={exitAnimation} timeout={500}>
@@ -175,7 +196,7 @@ const Formulario = () => {
 
           {/* Display dinâmico de acordo com "passo" para formulário */}
           {passo === 1 && <PassoUm fireErrorBtn={fireErrorBtn} form={form} setForm={setForm} passo={passo}/>}
-          {passo === 2 && <PassoDois departamentos={departamentos} fireErrorBtn={fireErrorBtn} form={form} setForm={setForm} passo={passo}/>}
+          {passo === 2 && <PassoDois departamentos={departamentos} fireErrorBtn={fireErrorBtn} form={form} setForm={setForm} passo={passo} colaboradores={colaboradores}/>}
           {passo === 3 && <PassoTres/>}
 
           <Box  sx={{
@@ -191,10 +212,10 @@ const Formulario = () => {
               {passo < 3 ? // Se em passo < 3
               <Fade in={true} timeout={500}>
                 <Box sx={{ position: 'relative', display: 'inline-block' }}>
-                  <PrimaryBtn disabled={!isValid} onClick={() => isValid && setPasso(passo + 1)}>
+                  <PrimaryBtn disabled={!currentValid} onClick={() => isValid && setPasso(passo + 1)}>
                     Próximo
                   </PrimaryBtn>
-                  {!isValid && (
+                  {!currentValid && (
                     <Box
                       onClick={handleClick}
                       sx={{
@@ -206,7 +227,7 @@ const Formulario = () => {
                   )}
                 </Box>
               </Fade>
-              : // Se estiver em passo > 3 (display do botão "Concluir" ) 
+              :
                 <PrimaryBtn disabled={!isValid} onClick={handleSubmit}>Concluir</PrimaryBtn>
                 }
             {/* ------------------------- */}
@@ -238,7 +259,6 @@ const PassoUm = ({form, setForm, fireErrorBtn} : PassoProps) => {
         value={form!.nome}
         error={stringError['nome'] || (form!.nome == '' && fireErrorBtn)}
         errorCall={stringError['nome'] ? 'caractere inválido' : 'Insira um nome'}
-        // Ao digitar, insere valor em val e testa de imediato para prever erro
         onChange={(e) => onChangeFunc(e, (val) => setForm!(prev => ({...prev, nome: String(val)})), 'string', 'nome')}
         />
 
@@ -271,10 +291,23 @@ const PassoUm = ({form, setForm, fireErrorBtn} : PassoProps) => {
   )
 }
 
-const PassoDois = ({setForm, form, departamentos} : PassoProps) => {
+const PassoDois = ({setForm, form, departamentos, colaboradores, fireErrorBtn} : PassoProps) => {
 
   const {toBRL, onChangeFunc, salarioError, erroSalarioReason, stringError} = useForm()
+  
+  // Checa se há gestor no departamento do colaborador sendo preenchido
+  const senioridadeItems = () => {
+  const base = ['Estagiário', 'Júnior', 'Pleno', 'Sênior']
+  
+  const hasGestor = colaboradores?.some(
+    c => c.departamento === form!.departamento && c.senioridade === 'Gestor'
+  )
 
+  const noDepartmentSelected = form!.departamento == ''
+  
+  if (noDepartmentSelected) return base // sem departamento → só base
+  return hasGestor ? base : [...base, 'Gestor']   
+}
   return (
 
     <PassoFrame title='Infos Profissionais'>
@@ -283,6 +316,8 @@ const PassoDois = ({setForm, form, departamentos} : PassoProps) => {
         <InputSelect 
           title='Departamento' 
           items={departamentos!} 
+          error={(form!.departamento.trim() == '' && fireErrorBtn)}
+          errorCall={"Insira um departamento"}
           value={form!.departamento} 
           onChange={(e) => setForm!(prev => ({ ...prev, departamento: e.target.value }))}
         />
@@ -290,15 +325,16 @@ const PassoDois = ({setForm, form, departamentos} : PassoProps) => {
         <InputField
           info="Cargo"
           value={form!.cargo}
-          error={stringError['cargo']}
-          errorCall={!stringError ? 'Insira um cargo' : 'caractere inválido'}
-          // Ao digitar, insere valor em val e testa de imediato para prever erro
+          error={stringError['cargo'] || (form!.cargo.trim() == '' && fireErrorBtn)}
+          errorCall={!stringError['cargo'] ? 'Insira um cargo' : 'caractere inválido'}
           onChange={(e) => onChangeFunc(e, (val) => setForm!(prev => ({...prev, cargo: String(val)})), 'string', 'cargo')}
         />
 
         <InputSelect 
           title='Senioridade' 
-          items={['Estagiário', 'Júnior', 'Pleno', 'Sênior']} 
+          items={senioridadeItems()} 
+          error={form!.senioridade == '' && fireErrorBtn}
+          errorCall={"Insira uma senioridade"}
           value={form!.senioridade} 
           onChange={(e) => setForm!(prev => ({ ...prev, senioridade: e.target.value }))}
         />
@@ -306,8 +342,8 @@ const PassoDois = ({setForm, form, departamentos} : PassoProps) => {
         <InputField
           info="Salário"
           value={toBRL(form!.salarioBase)}
-          error={salarioError}
-          errorCall={erroSalarioReason}
+          error={salarioError || (form!.salarioBase == 0 && fireErrorBtn)}
+          errorCall={form!.salarioBase == 0 ? 'Insira um salário' : erroSalarioReason}
           onChange={(e) => onChangeFunc(e, (salarioInput) => setForm!(prev => ({ ...prev, salarioBase: Number(salarioInput)})),'number', 'number')}
         />
 
